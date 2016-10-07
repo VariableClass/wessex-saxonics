@@ -16,5 +16,15 @@
     {% endif %}
 
         <p>The time is: {{ current_time }}</p>
+
+        {% if user %}
+            <form action="/prefs" method="post">
+                <label for = "tz_offset">
+                Timezone offset from UTC <em>(can be negative)</em>
+                </label>
+                <input name="tz_offset" id="tz_offset" type="text" size="4" value="{{ userprefs.tz_offset }}" />
+                <input type="submit" value="Submit"/>
+            </form>
+        {% endif %}
     </body>
 </html>
