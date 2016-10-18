@@ -1,13 +1,18 @@
 import models
 import webapp2
 
+
 class PrefsPage(webapp2.RequestHandler):
     def post(self):
-        userprefs = models.get_userprefs()
+        profilepicture = models.get_user_profile_picture()
         try:
-            tz_offset = float(self.request.get('tz_offset'))
-            userprefs.tz_offset = tz_offset
-            userprefs.put()
+            name = self.request.get('image_name')
+            size = float(self.request.get('image_size'))
+
+            profilepicture.name = name
+            profilepicture.size = size
+            profilepicture.put()
+
         except ValueError:
             # User entered a value that wasn't a float. Ignore for now.
             pass

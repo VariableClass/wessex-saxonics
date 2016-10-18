@@ -15,14 +15,16 @@
         </p>
     {% endif %}
 
-        <p>The time is: {{ current_time }}</p>
-
         {% if user %}
             <form action="/prefs" method="post">
-                <label for = "tz_offset">
-                Timezone offset from UTC <em>(can be negative)</em>
+                <label for = "image_name">
+                    Image label
                 </label>
-                <input name="tz_offset" id="tz_offset" type="text" size="4" value="{{ userprefs.tz_offset }}" />
+                <input name="image_name" id="image_name" type="text" size="4" value="{{ profilepicture.name }}" />
+                <label for = "image_size">
+                    Image size
+                </label>
+                <input name="image_size" id="image_size" type="text" size="4" value="{{ profilepicture.size }}" />
                 <input type="submit" value="Submit"/>
             </form>
         {% endif %}
