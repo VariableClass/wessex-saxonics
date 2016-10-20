@@ -16,15 +16,25 @@
     {% endif %}
 
         {% if user %}
-            <form action="/prefs" method="post">
-                <label for = "image_name">
-                    Image label
-                </label>
-                <input name="image_name" id="image_name" type="text" size="4" value="{{ profilepicture.name }}" />
-                <label for = "image_size">
-                    Image size
-                </label>
-                <input name="image_size" id="image_size" type="text" size="4" value="{{ profilepicture.size }}" />
+            <form action="/upload" method="post" enctype="multipart/form-data">
+                <p>
+                    <label for = "image_name">
+                        Image Name
+                    </label>
+                    <input name="image_name" id="image_name" type="text" size="4" value="{{ profilepicture.name }}" />
+                </p>
+                <p>
+                    <label for = "image_size">
+                        Image size
+                    </label>
+                    <input name="image_size" id="image_size" type="text" size="4" value="{{ profilepicture.size }}" />
+                </p>
+                <p>
+                    <label for = "image_file">
+                        File:
+                    </label>
+                    <input name="image_file" id="image_file" type="file" accept="image/*" size="4" value="{{ profilepicture.file }}"/>
+                </p>
                 <input type="submit" value="Submit"/>
             </form>
         {% endif %}

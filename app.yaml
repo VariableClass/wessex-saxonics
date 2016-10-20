@@ -3,8 +3,8 @@ api_version: 1
 threadsafe: true
 
 handlers:
-- url: /prefs
-  script: prefs.application
+- url: /upload
+  script: upload.application
   login: required
 
 - url: .*
