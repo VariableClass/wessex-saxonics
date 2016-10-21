@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>Time</title>
+        <title>Image Upload</title>
     </head>
     <body>
     {% if user %}
@@ -11,7 +11,7 @@
     {% else %}
         <p>
             Welcome!
-            <a href="{{ login_url }}">Sign in or register</a> to customise
+            <a href="{{ login_url }}">Sign in or register</a> to upload an image
         </p>
     {% endif %}
 
@@ -21,19 +21,13 @@
                     <label for = "image_name">
                         Image Name
                     </label>
-                    <input name="image_name" id="image_name" type="text" size="4" value="{{ profilepicture.name }}" />
-                </p>
-                <p>
-                    <label for = "image_size">
-                        Image size
-                    </label>
-                    <input name="image_size" id="image_size" type="text" size="4" value="{{ profilepicture.size }}" />
+                    <input name="image_name" id="image_name" type="text" size="20" value="{{ profile_picture.name }}" />
                 </p>
                 <p>
                     <label for = "image_file">
                         File:
                     </label>
-                    <input name="image_file" id="image_file" type="file" accept="image/*" size="4" value="{{ profilepicture.file }}"/>
+                    <input name="image_file" id="image_file" type="file" accept="image/*" size="4" value="{{ profile_picture.file }}"/>
                 </p>
                 <input type="submit" value="Submit"/>
             </form>
