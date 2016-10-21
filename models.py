@@ -4,10 +4,13 @@ from google.appengine.ext import ndb
 
 class Image(ndb.Model):
     name = ndb.StringProperty()
+    address = ndb.StringProperty()
+    height = ndb.FloatProperty()
+    width = ndb.FloatProperty()
     user = ndb.UserProperty(auto_current_user_add=True)
 
 
-def get_user_profile_picture(user_id=None):
+def get_user_image(user_id=None):
 
     # If no user ID given, get user to login
     if not user_id:
@@ -24,11 +27,11 @@ def get_user_profile_picture(user_id=None):
     key = ndb.Key('Image', user_id)
 
     # Retrieve image metadata from datastore
-    profile_picture = key.get()
+    user_image = key.get()
 
     # If no profile picture found, return blank new image
-    if not profile_picture:
-        profile_picture = Image(id=user_id)
+    if not user_image:
+        user_image = Image(id=user_id)
 
     # Return profile picture
-    return profile_picture
+    return user_image
