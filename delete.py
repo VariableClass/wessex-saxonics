@@ -20,6 +20,9 @@ class DeletePage(webapp2.RequestHandler):
         # Delete image from cloud cloud storage
         crud.delete_file('/' + user_image.bucket_name + '/' + user_image.name)
 
+        # Delete metadata from datastore
+        models.delete_user_image()
+
         # Return to main page
         self.redirect('/')
 

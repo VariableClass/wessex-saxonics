@@ -50,3 +50,42 @@ def get_user_image(user_id=None):
 
     # Return profile picture
     return user_image
+
+
+def _get_user_image_key(user_id=None):
+
+    # If no user ID given, get user to login
+    if not user_id:
+        user = users.get_current_user()
+
+        # If user not logged in, return None
+        if not user:
+            return None
+
+        # Else set user ID
+        user_id = user.user_id()
+
+    # Create datastore key
+    key = ndb.Key('Image', user_id)
+
+    return key
+
+
+def delete_user_image(user_id=None):
+
+    # If no user ID given, get user to login
+    if not user_id:
+        user = users.get_current_user()
+
+        # If user not logged in, return None
+        if not user:
+            return None
+
+        # Else set user ID
+        user_id = user.user_id()
+
+    # Create datastore key
+    key = ndb.Key('Image', user_id)
+
+    # Remove metadata
+    key.delete()
