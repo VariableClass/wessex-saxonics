@@ -4,10 +4,25 @@ from google.appengine.ext import ndb
 
 class Image(ndb.Model):
     name = ndb.StringProperty()
-    address = ndb.StringProperty()
+    bucket_name = ndb.StringProperty()
     height = ndb.FloatProperty()
     width = ndb.FloatProperty()
     user = ndb.UserProperty(auto_current_user_add=True)
+
+    # Retrieve public URL for image
+    @property
+    def public_url(self):
+
+        """
+        :rtype: object
+        """
+        if self.bucket_name is None or self.name is None:
+            return None
+
+        else:
+            # Return public image URL
+            return 'https://%(bucket)s.storage.googleapis.com/%(file)s' % {'bucket': self.bucket_name,
+                                                                           'file': self.name}
 
 
 def get_user_image(user_id=None):

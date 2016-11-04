@@ -23,7 +23,11 @@ def upload_image_file(image, name, image_type):
     filename = '/' + bucket_name + '/' + name
 
     # Create new cloud storage file to write to
-    gcs_file = gcs.open(filename, 'w', content_type=image_type, retry_params=write_retry_params)
+    gcs_file = gcs.open(filename,
+                        'w',
+                        content_type=image_type,
+                        retry_params=write_retry_params,
+                        options={'x-goog-acl': 'public-read'})
 
     # Write the image file to cloud storage
     gcs_file.write(image)
@@ -31,10 +35,7 @@ def upload_image_file(image, name, image_type):
     # Close the cloud storage file
     gcs_file.close()
 
-    # Store URL to return image
-    gcs_url = 'https://%(bucket)s.storage.googleapis.com/%(file)s' % {'bucket': bucket_name, 'file': name}
-
-    return gcs_url
+    return bucket_name
 
 
 # Retrieve image from cloud storage bucket
@@ -53,6 +54,17 @@ def retrieve_image_file(filename):
     gcs_file.close()
 
     return image
+
+
+# Delete image from cloud storage bucket
+def delete_file(filename):
+
+    # Try to delete the file, ignore if file is not found
+    try:
+        gcs.delete(filename)
+
+    except gcs.NotFoundError:
+        print (filename + 'not found')
 
 
 # Retrieve default bucket

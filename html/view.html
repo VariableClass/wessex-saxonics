@@ -8,15 +8,17 @@
             Welcome, {{ user.email() }}!
             You can <a href="{{ logout_url }}">sign out</a>
         </p>
+        <p>
+            <img height="{{ user_image.height }}" width="{{ user_image.width }}" src="{{ user_image.public_url }}"/>
+        </p>
+        <p>
+            <a href="/delete">Delete image</a>
+        </p>
     {% else %}
         <p>
             Welcome!
             <a href="{{ login_url }}">Sign in or register</a> to view an image
         </p>
     {% endif %}
-
-        {% if user %}
-            <image height="100" width="100" href="{{ user_image.address }}"></image>
-        {% endif %}
     </body>
 </html>

@@ -30,7 +30,7 @@ class MainPage(webapp2.RequestHandler):
         user_image = models.get_user_image()
 
         # If no user_image
-        if user_image is None or user_image.address is None:
+        if user_image is None or user_image.public_url is None:
 
             # Retrieve HTML template
             template = template_env.get_template('html/upload.html')
@@ -43,9 +43,6 @@ class MainPage(webapp2.RequestHandler):
             }
 
         else:
-
-            # Retrieve user image metadata
-            filename = user_image.name
 
             # Retrieve HTML template
             template = template_env.get_template('html/view.html')

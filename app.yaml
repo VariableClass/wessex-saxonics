@@ -3,6 +3,10 @@ api_version: 1
 threadsafe: true
 
 handlers:
+- url: /delete
+  script: delete.application
+  login: required
+
 - url: /upload
   script: upload.application
   login: required
