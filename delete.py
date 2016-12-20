@@ -23,8 +23,7 @@ class DeletePage(webapp2.RequestHandler):
         user = users.get_current_user()
 
         # Retrieve image model
-        user_image = models.Image.get_by_id(imageid)
-
+        user_image = models.Image.get_image_by_user(imageid, user)
 
         if user_image.user_id == user.user_id():
 
@@ -32,7 +31,7 @@ class DeletePage(webapp2.RequestHandler):
             crud.delete_file('/' + user_image.bucket_name + '/' + user_image.name)
 
             # Delete metadata from datastore
-            models.Image.delete_user_image(imageid)
+            models.Image.delete_user_image(imageid, user)
 
         # Return to main page
         self.redirect('/')

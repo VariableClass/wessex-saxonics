@@ -32,6 +32,10 @@ class Image(ndb.Model):
         return cls.query(cls.user_id == user.user_id())
 
     @classmethod
-    def delete_user_image(cls, name):
-        key = cls.get_by_id(name)
+    def get_image_by_user(cls, name, user):
+        return cls.query(cls.user_id == user.user_id(), cls.name == name).get()
+
+    @classmethod
+    def delete_user_image(cls, name, user):
+        key = cls.get_image_by_user(name, user).key
         key.delete()
