@@ -1,91 +1,37 @@
-from google.appengine.api import users
-from google.appengine.ext import ndb
+from google.appengine.ext import blobstore, ndb
+from google.appengine.api import images
 
 
 class Image(ndb.Model):
     name = ndb.StringProperty()
-    bucket_name = ndb.StringProperty()
+    user_id = ndb.StringProperty()
     height = ndb.FloatProperty()
     width = ndb.FloatProperty()
-    user = ndb.UserProperty(auto_current_user_add=True)
+    bucket_name = ndb.StringProperty()
 
     # Retrieve public URL for image
     @property
     def public_url(self):
 
-        """
-        :rtype: object
-        """
         if self.bucket_name is None or self.name is None:
             return None
 
         else:
-            # Return public image URL
-            return 'https://%(bucket)s.storage.googleapis.com/%(file)s' % {'bucket': self.bucket_name,
-                                                                           'file': self.name}
 
+            # Build blobstore type filename
+            blobstore_filename = '/gs/' + self.bucket_name + '/' + self.name
 
-def get_user_image(user_id=None):
+            # Get blobstore key
+            key = blobstore.create_gs_key(blobstore_filename)
 
-    # If no user ID given, get user to login
-    if not user_id:
-        user = users.get_current_user()
+            # Return scaled image serving URL
+            return images.get_serving_url(key, size=128)
 
-        # If user not logged in, return None
-        if not user:
-            return None
+    @classmethod
+    def get_all_by_user(cls, user):
+        return cls.query(cls.user_id == user.user_id())
 
-        # Else set user ID
-        user_id = user.user_id()
-
-    # Create datastore key
-    key = ndb.Key('Image', user_id)
-
-    # Retrieve image metadata from datastore
-    user_image = key.get()
-
-    # If no profile picture found, return blank new image
-    if not user_image:
-        user_image = Image(id=user_id)
-
-    # Return profile picture
-    return user_image
-
-
-def _get_user_image_key(user_id=None):
-
-    # If no user ID given, get user to login
-    if not user_id:
-        user = users.get_current_user()
-
-        # If user not logged in, return None
-        if not user:
-            return None
-
-        # Else set user ID
-        user_id = user.user_id()
-
-    # Create datastore key
-    key = ndb.Key('Image', user_id)
-
-    return key
-
-
-def delete_user_image(user_id=None):
-
-    # If no user ID given, get user to login
-    if not user_id:
-        user = users.get_current_user()
-
-        # If user not logged in, return None
-        if not user:
-            return None
-
-        # Else set user ID
-        user_id = user.user_id()
-
-    # Create datastore key
-    key = ndb.Key('Image', user_id)
-
-    # Remove metadata
-    key.delete()
+    @classmethod
+    def delete_user_image(cls, name):
+        key = cls.get_by_id(name)
+        key.delete()

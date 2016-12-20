@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>View Image: {{ user_image.name }}</title>
+        <title>View Images</title>
     </head>
     <body>
     {% if user %}
@@ -9,11 +9,16 @@
             You can <a href="{{ logout_url }}">sign out</a>
         </p>
         <p>
-            <img height="{{ user_image.height }}" width="{{ user_image.width }}" src="{{ user_image.public_url }}"/>
+            <a href="/upload">Upload Image</a>
         </p>
+
+        {% for user_image in user_images %}
         <p>
-            <a href="/delete">Delete image</a>
+            {{ user_image.name }}
+            <img src="{{ user_image.public_url }}"/>
+            <a href="/delete?imageid={{user_image.name}}">Delete image</a>
         </p>
+        {% endfor %}
     {% else %}
         <p>
             Welcome!
