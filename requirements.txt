@@ -1,4 +1,3 @@
-google
 image
 Flask==0.11.1
 google-cloud-storage==0.20.0
