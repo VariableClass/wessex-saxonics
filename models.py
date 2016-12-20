@@ -25,6 +25,23 @@ class Image(ndb.Model):
             key = blobstore.create_gs_key(blobstore_filename)
 
             # Return scaled image serving URL
+            return images.get_serving_url(key)
+    
+    @property
+    def thumbnail(self):
+
+        if self.bucket_name is None or self.name is None:
+            return None
+
+        else:
+
+            # Build blobstore type filename
+            blobstore_filename = '/gs/' + self.bucket_name + '/' + self.name
+
+            # Get blobstore key
+            key = blobstore.create_gs_key(blobstore_filename)
+
+            # Return scaled image serving URL
             return images.get_serving_url(key, size=128)
 
     @classmethod

@@ -1,11 +1,27 @@
 <html>
     <head>
-        <title>Media Server</title>
+        <title>Sign In - Wessex Saxonics</title>
     </head>
     <body>
-        <p>
-            Welcome!
-            <a href="{{ login_url }}">Sign in or register</a> to view an image
-        </p>
+        <header>Wessex Saxonics Media Server POC</header>
+	<nav>
+	    <a href="/">Home</a>
+	    {% if user %}
+	    <a href="/upload">Upload</a>
+	    <a href="{{ logout_url }}">Sign Out</a>
+	    {% else %}
+	    <a href="{{ login_url }}">Sign In</a>
+	    {% endif %}
+	</nav>
+
+	<section>
+            <p>
+	        {% if user %}
+		<a href="/upload">Upload</a> or <a href="/">Edit</a> an image to get started.
+		{% else %}
+                <a href="{{ login_url }}">Sign in or register</a> to get started.
+            	{% endif %}
+	    </p>
+	</section>
     </body>
 </html>

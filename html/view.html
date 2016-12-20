@@ -1,12 +1,13 @@
 <html>
     <head>
-        <title>Media Server, User: {{ user.nickname() }}</title>
+        <title>Welcome - Wessex Saxonics</title>
     </head>
     <body>
         <header>Wessex Saxonics Media Server POC</header>
         <nav>
-	    <a href="/upload">Upload</a>
+	    <a href="/">Home</a>
 	    {% if user %}
+	    <a href="/upload">Upload</a>
 	    <a href="{{ logout_url }}">Sign Out</a>
 	    {% else %}
 	    <a href="{{ login_url }}">Sign In</a>
@@ -18,7 +19,7 @@
             {% for user_image in user_images %}
                 <li>
                     <p>{{user_image.name}}</p>
-                    <img src="{{ user_image.public_url }}"/>
+                    <img src="{{ user_image.thumbnail }}"/>
 		    <p>
 		        <a href="/edit?imageid={{user_image.name}}">Edit</a>
                         <a href="/delete?imageid={{user_image.name}}">Delete</a>

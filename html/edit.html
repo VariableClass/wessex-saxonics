@@ -1,12 +1,13 @@
 <html>
     <head>
-        <title>Editing '{{ user_image.name }}'</title>
+        <title>Editing '{{ user_image.name }}' - Wessex Saxonics</title>
     </head>
     <body>
         <header>Wessex Saxonics Media Server POC</header>
         <nav>
-	    <a href="/upload">Upload</a>
+	    <a href="/">Home</a>
 	    {% if user %}
+	    <a href="/upload">Upload</a>
 	    <a href="{{ logout_url }}">Sign Out</a>
 	    {% else %}
 	    <a href="{{ login_url }}">Sign In</a>
