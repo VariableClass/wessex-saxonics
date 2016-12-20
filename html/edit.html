@@ -1,0 +1,25 @@
+<html>
+    <head>
+        <title>Editing '{{ user_image.name }}'</title>
+    </head>
+    <body>
+        <header>Wessex Saxonics Media Server POC</header>
+        <nav>
+	    <a href="/upload">Upload</a>
+	    {% if user %}
+	    <a href="{{ logout_url }}">Sign Out</a>
+	    {% else %}
+	    <a href="{{ login_url }}">Sign In</a>
+	    {% endif %}
+	</nav>
+
+	<section>
+            <p>{{user_image.name}}</p>
+            <img src="{{ user_image.public_url }}"/>
+	    <p>
+	        <p>Dimensions: <b>{{ user_image.width }}x{{ user_image.height }}</b></p>
+	        <a href="/delete?imageid={{user_image.name}}">Delete</a>
+            </p>
+        </section>
+    </body>
+</html>

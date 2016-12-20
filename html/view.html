@@ -1,29 +1,31 @@
 <html>
     <head>
-        <title>View Images</title>
+        <title>Media Server, User: {{ user.nickname() }}</title>
     </head>
     <body>
-    {% if user %}
-        <p>
-            Welcome, {{ user.email() }}!
-            You can <a href="{{ logout_url }}">sign out</a>
-        </p>
-        <p>
-            <a href="/upload">Upload Image</a>
-        </p>
+        <header>Wessex Saxonics Media Server POC</header>
+        <nav>
+	    <a href="/upload">Upload</a>
+	    {% if user %}
+	    <a href="{{ logout_url }}">Sign Out</a>
+	    {% else %}
+	    <a href="{{ login_url }}">Sign In</a>
+	    {% endif %}
+	</nav>
 
-        {% for user_image in user_images %}
-        <p>
-            {{ user_image.name }}
-            <img src="{{ user_image.public_url }}"/>
-            <a href="/delete?imageid={{user_image.name}}">Delete image</a>
-        </p>
-        {% endfor %}
-    {% else %}
-        <p>
-            Welcome!
-            <a href="{{ login_url }}">Sign in or register</a> to view an image
-        </p>
-    {% endif %}
+	<section>
+            <ul>
+            {% for user_image in user_images %}
+                <li>
+                    <p>{{user_image.name}}</p>
+                    <img src="{{ user_image.public_url }}"/>
+		    <p>
+		        <a href="/edit?imageid={{user_image.name}}">Edit</a>
+                        <a href="/delete?imageid={{user_image.name}}">Delete</a>
+                    </p>
+		</li>
+            {% endfor %}
+            </ul>
+        </section>
     </body>
 </html>

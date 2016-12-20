@@ -3,6 +3,10 @@ api_version: 1
 threadsafe: true
 
 handlers:
+- url: /edit
+  script: edit.application
+  login: required
+
 - url: /delete
   script: delete.application
   login: required
