@@ -64,20 +64,20 @@ class EditPage(webapp2.RequestHandler):
 
         # Retrieve image ID and updated metadata from request parameters
         imageid = self.request.get('imageid')
-        width = self.request.get('width')
-        height = self.request.POST.get('height')
         edit_mode = self.request.get('edit')
+        scale_factor = float(self.request.POST.get('scale_factor'))
 
         # Retrieve requested image
         user_image = models.Image.get_image_by_user(imageid, user)
 
         # Write new values to image
-        if (width > 0) & (height > 0):
-            user_image.width = int(width)
-            user_image.height = int(height)
+        scale_factor /= 100
 
-            # Save changes to datastore
-            user_image.put()
+        user_image.width = int(round(user_image.width * scale_factor))
+        user_image.height = int(round(user_image.height * scale_factor))
+
+        # Save changes to datastore
+        user_image.put()
 
         # Define HTML context
         context = {

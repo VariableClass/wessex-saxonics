@@ -5,8 +5,8 @@ from google.appengine.api import images
 class Image(ndb.Model):
     name = ndb.StringProperty()
     user_id = ndb.StringProperty()
-    height = ndb.FloatProperty()
-    width = ndb.FloatProperty()
+    height = ndb.IntegerProperty()
+    width = ndb.IntegerProperty()
     bucket_name = ndb.StringProperty()
 
     # Retrieve public URL for image
