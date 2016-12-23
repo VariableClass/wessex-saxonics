@@ -5,22 +5,37 @@
     <body>
         <header>Wessex Saxonics Media Server POC</header>
         <nav>
-	    <a href="/">Home</a>
-	    {% if user %}
-	    <a href="/upload">Upload</a>
-	    <a href="{{ logout_url }}">Sign Out</a>
-	    {% else %}
-	    <a href="{{ login_url }}">Sign In</a>
-	    {% endif %}
-	</nav>
+			<a href="/">Home</a>
+			{% if user %}
+			<a href="/upload">Upload</a>
+			<a href="{{ logout_url }}">Sign Out</a>
+			{% else %}
+			<a href="{{ login_url }}">Sign In</a>
+			{% endif %}
+		</nav>
 
-	<section>
-            <p>{{user_image.name}}</p>
-            <img src="{{ user_image.public_url }}"/>
-	    <p>
-	        <p>Dimensions: <b>{{ user_image.width }}x{{ user_image.height }}</b></p>
-	        <a href="/delete?imageid={{user_image.name}}">Delete</a>
-            </p>
-        </section>
+		<section>
+			<p>{{user_image.name}}</p>
+			<img src="{{ user_image.public_url }}" width="{{user_image.width}}" height="{{user_image.height}}"/>
+			<div>
+                {% if edit_mode == 'false' %}
+				<div>
+                    Dimensions: <b>{{ user_image.width }}x{{ user_image.height }}</b>
+		            <a href="/edit?imageid={{user_image.name}}&edit=true">Change</a>
+                </div>
+                {% else %}
+                <div>
+                    Dimensions:
+                    <form action="/edit?imageid={{user_image.name}}&edit=false" method="post" enctype="multipart/form-data">
+                        <input name="width" id="width" type="number" size="5" />
+                        x
+                        <input name="height" id="height" type="number" size="5" />
+                        <input type="submit" value="Save Changes"/>
+                    </form>
+                </div>
+                {% endif %}
+				<a href="/delete?imageid={{user_image.name}}">Delete</a>
+			</div>
+		</section>
     </body>
 </html>

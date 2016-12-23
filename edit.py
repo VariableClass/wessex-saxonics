@@ -32,12 +32,14 @@ class EditPage(webapp2.RequestHandler):
 
         # Retrieve image ID from request parameters
         imageid = self.request.get('imageid')
+        edit_mode = self.request.get('edit')
 
         # Retrieve requested image
         user_image = models.Image.get_image_by_user(imageid, user)
 
         # Define HTML context
         context = {
+            'edit_mode': edit_mode,
             'user': user,
             'user_image': user_image,
             'login_url': login_url,
@@ -47,5 +49,46 @@ class EditPage(webapp2.RequestHandler):
         # Return context-filled template
         self.response.out.write(template.render(context))
 
+    # Handle edit post action
+    def post(self):
+
+        # Retrieve user
+        user = users.get_current_user()
+
+        # Create authentication URLs
+        login_url = users.create_login_url(self.request.path)
+        logout_url = users.create_logout_url(self.request.path)
+
+        # Retrieve HTML template
+        template = template_env.get_template('html/edit.html')
+
+        # Retrieve image ID and updated metadata from request parameters
+        imageid = self.request.get('imageid')
+        width = self.request.get('width')
+        height = self.request.POST.get('height')
+        edit_mode = self.request.get('edit')
+
+        # Retrieve requested image
+        user_image = models.Image.get_image_by_user(imageid, user)
+
+        # Write new values to image
+        if (width > 0) & (height > 0):
+            user_image.width = int(width)
+            user_image.height = int(height)
+
+            # Save changes to datastore
+            user_image.put()
+
+        # Define HTML context
+        context = {
+            'edit_mode': edit_mode,
+            'user': user,
+            'user_image': user_image,
+            'login_url': login_url,
+            'logout_url': logout_url
+        }
+
+        # Return context-filled template
+        self.response.out.write(template.render(context))
 
 application = webapp2.WSGIApplication([('/edit', EditPage)], debug=True)
