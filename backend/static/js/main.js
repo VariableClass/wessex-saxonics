@@ -62,6 +62,7 @@ wessexsaxonics.mediaserver.auth = function() {
     wessexsaxonics.mediaserver.signout();
     wessexsaxonics.mediaserver.signedIn = false;
     document.querySelector('#signinButton').textContent = 'Sign in';
+    document.querySelector('#image_id').value = "";
     document.querySelector('#image_id').disabled = true;
     document.querySelector('#getImage').disabled = true;
     document.querySelector('#listImages').disabled = true;
@@ -89,7 +90,7 @@ wessexsaxonics.mediaserver.print = function(image) {
  * @param {string} id ID of the image.
  */
 wessexsaxonics.mediaserver.getImage = function(id) {
-  gapi.client.wessexsaxonics.images.get({'id': id}).execute(
+  gapi.client.wessexsaxonics.image.get({'image_id': id}).execute(
       function(resp) {
         if (!resp.code) {
           wessexsaxonics.mediaserver.print(resp);
@@ -121,7 +122,7 @@ wessexsaxonics.mediaserver.listImages = function() {
  */
 wessexsaxonics.mediaserver.enableButtons = function() {
   var getImage = document.querySelector('#getImage');
-  getImage.addEventListener('click', function(e) {
+  getImage.addEventListener('click', function() {
     wessexsaxonics.mediaserver.getImage(
         document.querySelector('#image_id').value);
   });
