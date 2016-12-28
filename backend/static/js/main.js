@@ -62,7 +62,9 @@ wessexsaxonics.mediaserver.auth = function() {
     wessexsaxonics.mediaserver.signout();
     wessexsaxonics.mediaserver.signedIn = false;
     document.querySelector('#signinButton').textContent = 'Sign in';
-    document.querySelector('#authedImage').disabled = true;
+    document.querySelector('#image_id').disabled = true;
+    document.querySelector('#getImage').disabled = true;
+    document.querySelector('#listImages').disabled = true;
   }
 };
 
@@ -96,16 +98,6 @@ wessexsaxonics.mediaserver.getImage = function(id) {
 };
 
 /**
- *  * Returns an authorised image via the API.
- *   */
-wessexsaxonics.mediaserver.authedImage = function() {
-  gapi.client.wessexsaxonics.images.list().authed().execute(
-    function(resp) {
-      wessexsaxonics.mediaserver.print(resp);
-    });
-};
-
-/**
  * Lists images via the API.
  */
 wessexsaxonics.mediaserver.listImages = function() {
@@ -131,16 +123,12 @@ wessexsaxonics.mediaserver.enableButtons = function() {
   var getImage = document.querySelector('#getImage');
   getImage.addEventListener('click', function(e) {
     wessexsaxonics.mediaserver.getImage(
-        document.querySelector('#id').value);
+        document.querySelector('#image_id').value);
   });
 
   var listImages = document.querySelector('#listImages');
   listImages.addEventListener('click',
       wessexsaxonics.mediaserver.listImages);
-
-  var authedImage = document.querySelector('#authedImage');
-  authedImage.addEventListener('click',
-      wessexsaxonics.mediaserver.authedImage);
 
   var signinButton = document.querySelector('#signinButton');
   signinButton.addEventListener('click',
@@ -155,7 +143,9 @@ wessexsaxonics.mediaserver.userAuthed = function() {
     if (!resp.code) {
       wessexsaxonics.mediaserver.signedIn = true;
       document.querySelector('#signinButton').textContent = 'Sign out';
-      document.querySelector('#authedImage').disabled = false;
+      document.querySelector('#image_id').disabled = false;
+      document.querySelector('#getImage').disabled = false;
+      document.querySelector('#listImages').disabled = false;
     }
   });
 };
