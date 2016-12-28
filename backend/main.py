@@ -99,10 +99,15 @@ class WessexSaxonicsApi(remote.Service):
 
             try:
                 image = models.Image.get_image_by_user(request.image_id, user_id)
-                return Image(name=image.name,
-                             height=image.height,
-                             width=image.width,
-                             bucket_name=image.bucket_name)
+
+                if image:
+                    return Image(name=image.name,
+                                 height=image.height,
+                                 width=image.width,
+                                 bucket_name=image.bucket_name)
+                else:
+                    raise endpoints.NotFoundException(
+                    'Image ID {} not found'.format(request.image_id))
 
             except (IndexError, TypeError):
                 raise endpoints.NotFoundException(
