@@ -21,7 +21,7 @@ class ImageCollection(messages.Message):
     items = messages.MessageField(Image, 1, repeated=True)
 
 
-WEB_CLIENT_ID = '552722976411-h725qf5c2eo8681r5g31butbvijfb3d0.apps.googleusercontent.com'
+WEB_CLIENT_ID = '552722976411-cdl5bddfvaf0fh9djhvetr47j59prgp8.apps.googleusercontent.com'
 ALLOWED_CLIENT_IDS = [
     WEB_CLIENT_ID,
     endpoints.API_EXPLORER_CLIENT_ID]
