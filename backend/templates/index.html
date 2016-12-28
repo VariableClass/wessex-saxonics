@@ -44,7 +44,10 @@
                 <span class="icon-bar"></span>
             </button>
             <a class="brand" href="#">Wessex Saxonics</a>
-        </div>
+            <div class="nav-collapse collapse pull-right">
+	        <a href="javascript:void(0);" class="btn" id="signinButton">Sign in</a>
+	    </div>
+	</div>
     </div>
 </div>
 <div class="container">
@@ -61,6 +64,12 @@
         <h2>List Images</h2>
         <div><input id="listImages" type="submit" class="btn btn-small" value="Submit"></div>
     </form>
+
+    <form onsubmit="return false;">
+        <h2>Authenticated Image</h2>
+        <div><input id="authedImage" type="submit" class="btn btn-small" disabled value="Submit"></div>
+    </form>
+
     <script>
         function init() {
             wessexsaxonics.mediaserver.init('//' + window.location.host + '/_ah/api');
