@@ -4,17 +4,72 @@
  * Wessex Saxonics API.
  */
 
-/** global namespace for Wessex-Saxonics. */
+/** Namespaces for Wessex-Saxonics and the media server POC. */
 var wessexsaxonics = wessexsaxonics || {};
-
-/** mediaserver namespace for media server POC. */
 wessexsaxonics.mediaserver = wessexsaxonics.mediaserver || {};
 
 /**
- *  * Whether or not the user is signed in.
- *   * @type {boolean}
- *    */
+ * * Client ID of the application.
+ * * @type {string}
+ * */
+wessexsaxonics.mediaserver.CLIENT_ID = '552722976411-cdl5bddfvaf0fh9djhvetr47j59prgp8.apps.googleusercontent.com';
+
+/**
+ * * Scopes used by the application.
+ * * @type {string}
+ * */
+wessexsaxonics.mediaserver.SCOPES = 'https://www.googleapis.com/auth/userinfo.email';
+
+
+/**
+ * * Sign-In
+ * */
+
+/**
+ * * Whether or not the user is signed in.
+ * * @type {boolean}
+ * */
 wessexsaxonics.mediaserver.signedIn = false;
+
+/**
+ * * Handles the auth flow, with the given value for immediate mode.
+ * * @param {boolean} mode Whether or not to use immediate mode.
+ * * @param {Function} callback Callback to call on completion.
+ * */
+wessexsaxonics.mediaserver.signin = function(mode, callback) {
+  gapi.auth.authorize({client_id: wessexsaxonics.mediaserver.CLIENT_ID,
+    scope: wessexsaxonics.mediaserver.SCOPES, immediate: mode,
+    cookie_policy: 'single_host_origin'},
+      callback);
+};
+
+/**
+ * * Handles sign out
+ * */
+wessexsaxonics.mediaserver.signout = function(mode, callback) {
+  gapi.auth.setToken(null);
+  gapi.auth.signOut();
+};
+
+/**
+ * * Presents the user with the authorization popup.
+ * */
+wessexsaxonics.mediaserver.auth = function() {
+  if (!wessexsaxonics.mediaserver.signedIn) {
+    wessexsaxonics.mediaserver.signin(false,
+        wessexsaxonics.mediaserver.userAuthed);
+  } else {
+    wessexsaxonics.mediaserver.signout();
+    wessexsaxonics.mediaserver.signedIn = false;
+    document.querySelector('#signinButton').textContent = 'Sign in';
+    document.querySelector('#authedImage').disabled = true;
+  }
+};
+
+
+/**
+ * * Image Output
+ */
 
 /**
  * Prints a image to the image log.
@@ -25,31 +80,6 @@ wessexsaxonics.mediaserver.print = function(image) {
   element.classList.add('row');
   element.innerHTML = "Name: " + image.name + ", width: " + image.width + ", height: " + image.height + ", bucket name: " + image.bucket_name;
   document.querySelector('#outputLog').appendChild(element);
-};
-
-/**
- *  * Handles the auth flow, with the given value for immediate mode.
- *   * @param {boolean} mode Whether or not to use immediate mode.
- *    * @param {Function} callback Callback to call on completion.
- *     */
-wessexsaxonics.mediaserver.signin = function(mode, callback) {
-  gapi.auth.authorize({client_id: wessexsaxonics.mediaserver.CLIENT_ID,
-    scope: wessexsaxonics.mediaserver.SCOPES, immediate: mode},
-      callback);
-};
-
-/**
- *  * Presents the user with the authorization popup.
- *   */
-wessexsaxonics.mediaserver.auth = function() {
-	  if (!wessexsaxonics.mediaserver.signedIn) {
-	    wessexsaxonics.mediaserver.signin(false,
-	        wessexsaxonics.mediaserver.userAuthed);
-  } else {
-    wessexsaxonics.mediaserver.signedIn = false;
-    document.querySelector('#signinButton').textContent = 'Sign in';
-    document.querySelector('#authedGreeting').disabled = true;
-  }
 };
 
 /**
@@ -66,10 +96,10 @@ wessexsaxonics.mediaserver.getImage = function(id) {
 };
 
 /**
- *  * Greets the current user via the API.
+ *  * Returns an authorised image via the API.
  *   */
-wessexsaxonics.mediaserver.authedGreeting = function(id) {
-  gapi.client.wessexsaxonics.images.authed().execute(
+wessexsaxonics.mediaserver.authedImage = function() {
+  gapi.client.wessexsaxonics.images.list().authed().execute(
     function(resp) {
       wessexsaxonics.mediaserver.print(resp);
     });
@@ -91,6 +121,10 @@ wessexsaxonics.mediaserver.listImages = function() {
 };
 
 /**
+ * * UI
+ */
+
+/**
  * Enables the button callbacks in the UI.
  */
 wessexsaxonics.mediaserver.enableButtons = function() {
@@ -103,19 +137,19 @@ wessexsaxonics.mediaserver.enableButtons = function() {
   var listImages = document.querySelector('#listImages');
   listImages.addEventListener('click',
       wessexsaxonics.mediaserver.listImages);
-  
+
   var authedImage = document.querySelector('#authedImage');
   authedImage.addEventListener('click',
       wessexsaxonics.mediaserver.authedImage);
 
   var signinButton = document.querySelector('#signinButton');
-  signinButton.addEventListener('click', 
+  signinButton.addEventListener('click',
       wessexsaxonics.mediaserver.auth);
 };
 
 /**
- *  * Loads the application UI after the user has completed auth.
- *   */
+ * * Loads the application UI after the user has completed auth.
+ * */
 wessexsaxonics.mediaserver.userAuthed = function() {
   var request = gapi.client.oauth2.userinfo.get().execute(function(resp) {
     if (!resp.code) {
@@ -126,17 +160,10 @@ wessexsaxonics.mediaserver.userAuthed = function() {
   });
 };
 
-/**
- *  * Client ID of the application.
- *   * @type {string}
- *    */
-wessexsaxonics.mediaserver.CLIENT_ID = '552722976411-cdl5bddfvaf0fh9djhvetr47j59prgp8.apps.googleusercontent.com';
 
-/**
- *  * Scopes used by the application.
- *   * @type {string}
- *    */
-wessexsaxonics.mediaserver.SCOPES = 'https://www.googleapis.com/auth/userinfo.email';
+/*
+ * * Application Initialisation
+ */
 
 /**
  * Initializes the application.
