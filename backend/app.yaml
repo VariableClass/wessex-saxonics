@@ -1,0 +1,23 @@
+runtime: python27
+api_version: 1
+threadsafe: true
+service: default
+
+handlers:
+- url: /_ah/spi/.*
+  script: main.api
+
+libraries:
+- name: webapp2
+  version: "2.5.2"
+- name: jinja2
+  version: "2.6"
+- name: markupsafe
+  version: "0.15"
+- name: pycrypto
+  version: 2.6
+- name: endpoints
+  version: 1.0
+
+env_variables:
+  FIREBASE_PROJECT_ID: 'wessex-saxonics'

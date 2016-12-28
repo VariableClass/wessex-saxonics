@@ -26,7 +26,7 @@ class Image(ndb.Model):
 
             # Return scaled image serving URL
             return images.get_serving_url(key)
-    
+
     @property
     def thumbnail(self):
 
@@ -45,14 +45,14 @@ class Image(ndb.Model):
             return images.get_serving_url(key, size=128)
 
     @classmethod
-    def get_all_by_user(cls, user):
-        return cls.query(cls.user_id == user.user_id())
+    def get_all_by_user(cls, user_id):
+        return cls.query(cls.user_id == user_id)
 
     @classmethod
-    def get_image_by_user(cls, name, user):
-        return cls.query(cls.user_id == user.user_id(), cls.name == name).get()
+    def get_image_by_user(cls, name, user_id):
+        return cls.query(cls.user_id == user_id, cls.name == name).get()
 
     @classmethod
-    def delete_user_image(cls, name, user):
-        key = cls.get_image_by_user(name, user).key
+    def delete_user_image(cls, name, user_id):
+        key = cls.get_image_by_user(name, user_id).key
         key.delete()
