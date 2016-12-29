@@ -1,0 +1,148 @@
+swagger: '2.0'
+info:
+  title: Wessex Saxonics Media Server API
+  description: API for Wessex Saxonics Media Server
+  version: "1.0.0"
+# the domain of the service
+host: wessex-saxonics.appspot.com
+# array of all schemes that your API supports
+schemes:
+  - https
+# will be prefixed to all paths
+basePath: /_ah/api/wessexsaxonics/v1
+produces:
+  - application/json
+paths:
+  /images:
+    get:
+      summary: Images
+      operationId: imagesList
+      description: |
+        The Images endpoint returns all images stored for a given user. The response includes each image and the corresponding metadata.
+      tags:
+        - Images
+      responses:
+        200:
+          description: An array of Images
+        401:
+          description: Unauthorized
+        default:
+          description: Unexpected error
+          
+    post:
+      summary: Upload Image
+      operationId: imageUpload
+      description: |
+        Posting to the Images endpoint uploads a new Image against a user account. The response confirms a successful upload.
+      parameters:
+        - name: name
+          in: query
+          description: ID to assign to image.
+          required: true
+          type: string
+        - name: width
+          in: query
+          description: Custom image width.
+          type: integer
+          format: int64
+        - name: height
+          in: query
+          description: Custom image height.
+          type: integer
+          format: int64
+        
+      tags:
+        - Images
+      responses:
+        204:
+          description: Empty success response
+        401:
+          description: Unauthorized
+        default:
+          description: Unexpected error
+          
+  /images/{image_id}:
+    get:
+      summary: Image
+      operationId: imageGet
+      description: |
+        The Image endpoint returns a single image, given an ID. The response includes the image and it's corresponding metadata.
+      parameters:
+        - name: image_id
+          in: path
+          description: ID of image to return
+          required: true
+          type: string
+      tags:
+        - Image
+      responses:
+        200:
+          description: A single Image
+        401:
+          description: Unauthorized
+        default:
+          description: Unexpected error
+    
+    post:
+      summary: Update Image
+      operationId: imageEdit
+      description: |
+        Overwrites one or many of the provided image metadata values. The response displays the updated image metadata, along with all other metadata items.
+      parameters:
+        - name: image_id
+          in: path
+          description: ID of image to update
+          required: true
+          type: string
+        - name: scale_factor
+          in: query
+          description: Percent by which to scale the image
+          type: integer
+          format: int64
+        - name: width
+          in: query
+          description: New image width value
+          type: integer
+          format: int64
+        - name: height
+          in: query
+          description: New image height value
+          type: integer
+          format: int64
+      tags:
+      - Image
+      responses:
+        200:
+          description: A single Image.
+        401:
+          description: Unauthorized
+        default:
+          description: Unexpected error
+        
+    delete:
+      summary: Delete Image
+      operationId: imageDelete
+      description: |
+        Deletes a single image, given an ID. The responses confirms a successful deletion.
+      parameters:
+        - name: image_id
+          in: path
+          description: ID of image to delete.
+          required: true
+          type: string
+      tags:
+        - Image
+      responses:
+        204:
+          description: Empty success response
+        401:
+          description: Unauthorized
+        default:
+          description: Unexpected error
+
+securityDefinitions:
+  
+  api_key:
+    type: apiKey
+    in: query
+    name: key

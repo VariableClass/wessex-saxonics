@@ -12,7 +12,7 @@ handlers:
   static_files: templates/index.html
   upload: templates/index\.html
   secure: always
-- url: /_ah/spi/.*
+- url: /_ah/api/.*
   script: main.api
   secure: always
 
@@ -27,6 +27,10 @@ libraries:
   version: 2.6
 - name: endpoints
   version: 1.0
+- name: ssl
+  version: latest
 
 env_variables:
+  ENDPOINTS_SERVICE_NAME: wessex-saxonics.appspot.com
+  ENDPOINTS_SERVICE_VERSION: 2016-12-29r15
   FIREBASE_PROJECT_ID: 'wessex-saxonics'
