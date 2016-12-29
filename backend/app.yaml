@@ -11,8 +11,10 @@ handlers:
 - url: /
   static_files: templates/index.html
   upload: templates/index\.html
+  secure: always
 - url: /_ah/spi/.*
   script: main.api
+  secure: always
 
 libraries:
 - name: webapp2
