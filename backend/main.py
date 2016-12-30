@@ -1,10 +1,7 @@
 # [START imports]
-import sys
-sys.path.append('lib')
-
-import models
 
 import endpoints
+import models
 from protorpc import message_types, messages, remote
 
 # [END imports]
@@ -14,7 +11,6 @@ class Image(messages.Message):
     name = messages.StringField(1, required=True)
     height = messages.IntegerField(2)
     width = messages.IntegerField(3)
-    bucket_name = messages.StringField(4, required=True)
 
 
 class ImageCollection(messages.Message):
@@ -26,11 +22,15 @@ ALLOWED_CLIENT_IDS = [
     WEB_CLIENT_ID,
     endpoints.API_EXPLORER_CLIENT_ID]
 
+# firebase_issuer = endpoints.Issuer(
+#   issuer='https://securetoken.google.com/wessex-saxonics',
+#   jwks_uri='https://www.googleapis.com/service_accounts/v1/metadata/x509/securetoken@system.gserviceaccount.com')
 
 @endpoints.api(name='wessexsaxonics',
                version='v1',
                allowed_client_ids=ALLOWED_CLIENT_IDS,
                scopes=[endpoints.EMAIL_SCOPE])
+#               issuers=[firebase_issuer])
 class WessexSaxonicsApi(remote.Service):
 
     ITEMS_PER_PAGE = 20
@@ -63,8 +63,7 @@ class WessexSaxonicsApi(remote.Service):
 
                 ret_images.items.append(Image(name=image.name,
                                         height=image.height,
-                                        width=image.width,
-                                        bucket_name=image.bucket_name))
+                                        width=image.width))
 
             return ret_images
 
@@ -103,8 +102,7 @@ class WessexSaxonicsApi(remote.Service):
                 if image:
                     return Image(name=image.name,
                                  height=image.height,
-                                 width=image.width,
-                                 bucket_name=image.bucket_name)
+                                 width=image.width)
                 else:
                     raise endpoints.NotFoundException(
                     'Image ID {} not found'.format(request.image_id))
@@ -142,7 +140,7 @@ class WessexSaxonicsApi(remote.Service):
                                 user_id=user_id,
                                 height=request.height,
                                 width=request.width,
-                                bucket_name=request.bucket_name)
+                                bucket_name="wessex-saxonics")
             image.put()
             return message_types.VoidMessage()
 
@@ -207,8 +205,7 @@ class WessexSaxonicsApi(remote.Service):
 
                 return Image(name=image.name,
                              height=image.height,
-                             width=image.width,
-                             bucket_name=image.bucket_name)
+                             width=image.width)
 
             except (IndexError, TypeError):
                 raise endpoints.NotFoundException(
@@ -258,8 +255,3 @@ class WessexSaxonicsApi(remote.Service):
                 'Please provide user credentials')
 
 api = endpoints.api_server([WessexSaxonicsApi])
-
-# FIREBASE STUFF #
-
-# id_token = self.request.headers['Authorization'].split(' ').pop()
-# claims = auth_token.verify_firebase_token(id_token, self.request)

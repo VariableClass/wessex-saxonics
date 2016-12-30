@@ -65,7 +65,6 @@ wessexsaxonics.mediaserver.auth = function() {
     document.querySelector("#image_id").value = "";
     document.querySelector("#image_id").disabled = true;
     document.querySelector("#getImage").disabled = true;
-    document.querySelector("#listImages").disabled = true;
   }
 };
 
@@ -79,10 +78,9 @@ wessexsaxonics.mediaserver.auth = function() {
  * param {Object} image Image to display.
  */
 wessexsaxonics.mediaserver.print = function(image) {
-  var element = document.createElement("div");
-  element.classList.add("row");
-  element.innerHTML = "Name: " + image.name + ", width: " + image.width + ", height: " + image.height + ", bucket name: " + image.bucket_name;
-  document.querySelector("#outputLog").appendChild(element);
+  var listItem = document.createElement("li");
+  listItem.appendChild(document.createTextNode("Name: " + image.name + ", width: " + image.width + ", height: " + image.height));
+  document.querySelector("#images").appendChild(listItem);
 };
 
 /**
@@ -127,10 +125,6 @@ wessexsaxonics.mediaserver.enableButtons = function() {
         document.querySelector("#image_id").value);
   });
 
-  var listImages = document.querySelector("#listImages");
-  listImages.addEventListener("click",
-      wessexsaxonics.mediaserver.listImages);
-
   var signinButton = document.querySelector("#signinButton");
   signinButton.addEventListener("click",
       wessexsaxonics.mediaserver.auth);
@@ -140,15 +134,13 @@ wessexsaxonics.mediaserver.enableButtons = function() {
  * * Loads the application UI after the user has completed auth.
  * */
 wessexsaxonics.mediaserver.userAuthed = function() {
-  var request = gapi.client.oauth2.userinfo.get().execute(function(resp) {
-    if (!resp.code) {
-      wessexsaxonics.mediaserver.signedIn = true;
-      document.querySelector("#signinButton").textContent = "Sign out";
-      document.querySelector("#image_id").disabled = false;
-      document.querySelector("#getImage").disabled = false;
-      document.querySelector("#listImages").disabled = false;
-    }
-  });
+    wessexsaxonics.mediaserver.signedIn = true;
+    document.querySelector("#signinButton").textContent = "Sign out";
+    document.querySelector("#image_id").disabled = false;
+    document.querySelector("#getImage").disabled = false;
+
+    // Display all user images
+    wessexsaxonics.mediaserver.listImages();
 };
 
 
@@ -158,20 +150,16 @@ wessexsaxonics.mediaserver.userAuthed = function() {
 
 /**
  * Initializes the application.
- * @param {string} apiRoot Root of the API"s path.
  */
-wessexsaxonics.mediaserver.init = function(apiRoot) {
-  // Loads the OAuth and helloworld APIs asynchronously, and triggers login
-  // when they have completed.
+wessexsaxonics.mediaserver.init = function() {
+  // Loads API asynchronously, and triggers login when complete
   var apisToLoad;
   var callback = function() {
     if (--apisToLoad == 0) {
       wessexsaxonics.mediaserver.enableButtons();
-      wessexsaxonics.mediaserver.signin(true, wessexsaxonics.mediaserver.userAuthed);
     }
-};
+  }
 
-  apisToLoad = 2; // must match number of calls to gapi.client.load()
-  gapi.client.load("wessexsaxonics", "v1", callback, apiRoot);
-  gapi.client.load("oauth2", "v2", callback);
+  apisToLoad = 1; // must match number of calls to gapi.client.load()
+  gapi.client.load("wessexsaxonics", "v1", callback, 'https://backend-dot-wessex-saxonics.appspot.com/_ah/api');
 };

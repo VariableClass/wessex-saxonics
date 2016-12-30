@@ -1,0 +1,17 @@
+runtime: python27
+api_version: 1
+threadsafe: true
+service: default
+
+handlers:
+- url: /js
+  static_dir: static/js
+- url: /bootstrap
+  static_dir: static/bootstrap
+- url: /
+  static_files: templates/index.html
+  upload: templates/index\.html
+  secure: always
+
+env_variables:
+  FIREBASE_PROJECT_ID: 'wessex-saxonics'
