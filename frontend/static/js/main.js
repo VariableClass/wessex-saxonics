@@ -8,65 +8,51 @@
 var wessexsaxonics = wessexsaxonics || {};
 wessexsaxonics.mediaserver = wessexsaxonics.mediaserver || {};
 
-/**
- * * Client ID of the application.
- * * @type {string}
- * */
-wessexsaxonics.mediaserver.CLIENT_ID = "552722976411-cdl5bddfvaf0fh9djhvetr47j59prgp8.apps.googleusercontent.com";
 
 /**
- * * Scopes used by the application.
- * * @type {string}
+ * * Navigation items
  * */
-wessexsaxonics.mediaserver.SCOPES = "https://www.googleapis.com/auth/userinfo.email";
+var home = document.getElementById('home');
+var upload = document.getElementById('upload');
+var signout = document.getElementById('sign-out');
+
+/**
+ * * Navigation click actions
+ * */
+
+home.onclick = function(){
+    home.className = "active"
+    upload.className = "";
+    signout.className = "";
+}
+
+upload.onclick = function(){
+    home.className = ""
+    upload.className = "active";
+    signout.className = "";
+}
+
+signout.onclick = function(){
+    firebase.auth().signOut();
+    home.className = ""
+    upload.className = "";
+    signout.className = "active";
+}
+
 
 
 /**
- * * Sign-In
+ * * Firebase authentication user action
  * */
-
-/**
- * * Whether or not the user is signed in.
- * * @type {boolean}
- * */
-wessexsaxonics.mediaserver.signedIn = false;
-
-/**
- * * Handles the auth flow, with the given value for immediate mode.
- * * @param {boolean} mode Whether or not to use immediate mode.
- * * @param {Function} callback Callback to call on completion.
- * */
-wessexsaxonics.mediaserver.signin = function(mode, callback) {
-  gapi.auth.authorize({client_id: wessexsaxonics.mediaserver.CLIENT_ID,
-    scope: wessexsaxonics.mediaserver.SCOPES, immediate: mode,
-    cookie_policy: "single_host_origin"},
-      callback);
-};
-
-/**
- * * Handles sign out
- * */
-wessexsaxonics.mediaserver.signout = function(mode, callback) {
-  gapi.auth.setToken(null);
-  gapi.auth.signOut();
-};
-
-/**
- * * Presents the user with the authorization popup.
- * */
-wessexsaxonics.mediaserver.auth = function() {
-  if (!wessexsaxonics.mediaserver.signedIn) {
-    wessexsaxonics.mediaserver.signin(false,
-        wessexsaxonics.mediaserver.userAuthed);
+firebase.auth().onAuthStateChanged(function(user) {
+  if (user) {
+      document.getElementById('firebase').style.display = 'none'
+      signout.style.display = 'block'
   } else {
-    wessexsaxonics.mediaserver.signout();
-    wessexsaxonics.mediaserver.signedIn = false;
-    document.querySelector("#signinButton").textContent = "Sign in";
-    document.querySelector("#image_id").value = "";
-    document.querySelector("#image_id").disabled = true;
-    document.querySelector("#getImage").disabled = true;
+      document.getElementById('firebase').style.display = 'block'
+      signout.style.display = 'none'
   }
-};
+});
 
 
 /**
@@ -111,6 +97,7 @@ wessexsaxonics.mediaserver.listImages = function() {
         });
 };
 
+
 /**
  * * UI
  */
@@ -129,6 +116,7 @@ wessexsaxonics.mediaserver.enableButtons = function() {
   signinButton.addEventListener("click",
       wessexsaxonics.mediaserver.auth);
 };
+
 
 /**
  * * Loads the application UI after the user has completed auth.
