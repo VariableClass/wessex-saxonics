@@ -28,6 +28,14 @@ body {
     background-color: #111;
 }
 
-.active {
+#navbar li .active {
     background-color: #5B7ADF;
+}
+
+#content div {
+    visibility: hidden;
+}
+
+#content .active {
+    visibility: visible;
 }

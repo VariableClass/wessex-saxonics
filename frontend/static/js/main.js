@@ -17,28 +17,44 @@ var upload = document.getElementById('upload');
 var signout = document.getElementById('sign-out');
 
 /**
+ * * Pages
+ * */
+var viewPage = document.getElementById('view-page');
+var uploadPage = document.getElementById('upload-page');
+var editPage = document.getElementById('edit-page');
+
+/**
  * * Navigation click actions
  * */
+var active = "active";
+
 
 home.onclick = function(){
-    home.className = "active"
-    upload.className = "";
-    signout.className = "";
+    wessexsaxonics.mediaserver.deactivateAllElements();
+    home.className = active;
+    viewPage.className = active;
 }
 
 upload.onclick = function(){
-    home.className = ""
-    upload.className = "active";
-    signout.className = "";
+    wessexsaxonics.mediaserver.deactivateAllElements();
+    upload.className = active;
+    uploadPage.className = active;
+
 }
 
 signout.onclick = function(){
     firebase.auth().signOut();
-    home.className = ""
-    upload.className = "";
-    signout.className = "active";
+    wessexsaxonics.mediaserver.deactivateAllElements();
+    signout.className = active;
 }
 
+wessexsaxonics.mediaserver.deactivateAllElements = function(){
+    var elements = document.getElementsByClassName(active);
+
+    for (var i = 0; i < elements.length; i++) {
+       elements[i].classList.remove(active);
+    }
+};
 
 
 /**
@@ -66,7 +82,7 @@ firebase.auth().onAuthStateChanged(function(user) {
 wessexsaxonics.mediaserver.print = function(image) {
   var listItem = document.createElement("li");
   listItem.appendChild(document.createTextNode("Name: " + image.name + ", width: " + image.width + ", height: " + image.height));
-  document.querySelector("#images").appendChild(listItem);
+  document.getElementById("#images").appendChild(listItem);
 };
 
 /**
@@ -86,6 +102,13 @@ wessexsaxonics.mediaserver.getImage = function(id) {
  * Lists images via the API.
  */
 wessexsaxonics.mediaserver.listImages = function() {
+
+    // Clear images
+    var images = document.getElementById("images");
+    while (images.firstChild) {
+        images.removeChild(images.firstChild);
+    }
+
     gapi.client.wessexsaxonics.images.list().execute(
         function(resp) {
             if (!resp.code) {
@@ -106,15 +129,11 @@ wessexsaxonics.mediaserver.listImages = function() {
  * Enables the button callbacks in the UI.
  */
 wessexsaxonics.mediaserver.enableButtons = function() {
-  var getImage = document.querySelector("#getImage");
-  getImage.addEventListener("click", function() {
-    wessexsaxonics.mediaserver.getImage(
-        document.querySelector("#image_id").value);
-  });
-
-  var signinButton = document.querySelector("#signinButton");
-  signinButton.addEventListener("click",
-      wessexsaxonics.mediaserver.auth);
+  // var getImage = document.querySelector("#getImage");
+  // getImage.addEventListener("click", function() {
+  //   wessexsaxonics.mediaserver.getImage(
+  //       document.querySelector("#image_id").value);
+  // });
 };
 
 
