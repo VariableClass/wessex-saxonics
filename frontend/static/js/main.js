@@ -30,22 +30,28 @@ var active = "active";
 
 
 home.onclick = function(){
-    wessexsaxonics.mediaserver.deactivateAllElements();
-    home.className = active;
-    viewPage.className = active;
+    wessexsaxonics.mediaserver.loadMainPage();
 }
 
 upload.onclick = function(){
     wessexsaxonics.mediaserver.deactivateAllElements();
     upload.className = active;
-    uploadPage.className = active;
-
+    viewPage.style.display = 'none';
+    uploadPage.style.display = 'block';
 }
 
 signout.onclick = function(){
     firebase.auth().signOut();
     wessexsaxonics.mediaserver.deactivateAllElements();
     signout.className = active;
+}
+
+wessexsaxonics.mediaserver.loadMainPage = function(){
+
+    wessexsaxonics.mediaserver.deactivateAllElements();
+    home.className = active;
+    viewPage.style.display = 'block';
+    uploadPage.style.display = 'none';
 }
 
 wessexsaxonics.mediaserver.deactivateAllElements = function(){
@@ -64,6 +70,8 @@ firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
       document.getElementById('firebase').style.display = 'none'
       signout.style.display = 'block'
+
+      wessexsaxonics.mediaserver.loadMainPage();
   } else {
       document.getElementById('firebase').style.display = 'block'
       signout.style.display = 'none'

@@ -33,9 +33,6 @@ body {
 }
 
 #content div {
-    visibility: hidden;
-}
-
-#content .active {
-    visibility: visible;
+    display: none;
+    margin: 10px;
 }
