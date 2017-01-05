@@ -55,12 +55,22 @@ uploadForm.onsubmit = function(){
     var file    = document.querySelector('input[type=file]').files[0];
     var reader  = new FileReader();
 
-    reader.addEventListener("load", function () {
+    // On new FileReader, retrieve file and file name, then build a new image
+    // from which to retrieve width and height, to then upload
+    reader.onload = function () {
+
       var name = document.getElementById('image_name').value;
       var imageFile = reader.result;
-      wessexsaxonics.mediaserver.uploadImage(name, imageFile, 10, 10);
-    }, false);
 
+      var img = new Image;
+      img.onload = function() {
+          wessexsaxonics.mediaserver.uploadImage(name, imageFile, img.width, img.height);
+      }
+
+      img.src = imageFile;
+    };
+
+    // If file uploaded, read in file
     if (file) {
       reader.readAsDataURL(file);
     }
@@ -111,14 +121,23 @@ firebase.auth().onAuthStateChanged(function(user) {
  * param {Object} image Image to display.
  */
 wessexsaxonics.mediaserver.print = function(name, image, width, height) {
-  var listItem = document.createElement("li");
+  var imageDiv = document.createElement("div");
+  imageDiv.className = "float-image";
+
   var html_image = document.createElement("img");
   html_image.src = image;
-  listItem.appendChild(document.createTextNode("Name: " + name));
-  listItem.appendChild(html_image);
-  listItem.appendChild(document.createTextNode("Width: " + width));
-  listItem.appendChild(document.createTextNode("Height: " + height));
-  document.getElementById("images").appendChild(listItem);
+  html_image.alt = name;
+
+  var nameLabel = document.createElement("p");
+  nameLabel.innerHTML = "<b>Name:</b> " + name;
+
+  var dimensionsLabel = document.createElement("p");
+  dimensionsLabel.innerHTML = "<b>Width:</b> " + width + ", <b>Height:</b> " + height;
+
+  imageDiv.appendChild(html_image);
+  imageDiv.appendChild(nameLabel);
+  imageDiv.appendChild(dimensionsLabel);
+  document.getElementById("images").appendChild(imageDiv);
 };
 
 /**
@@ -203,9 +222,10 @@ wessexsaxonics.mediaserver.uploadImage = function(id, image, width, height) {
           'Bearer ' + idToken);
         xhr.setRequestHeader("Content-type", "application/json");
         xhr.send(JSON.stringify(jsonPayload));
-    });
+    }).then(function(){
 
-    wessexsaxonics.mediaserver.loadMainPage();
+        wessexsaxonics.mediaserver.loadMainPage();
+    });
 };
 
 /**

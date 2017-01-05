@@ -32,7 +32,12 @@ body {
     background-color: #5B7ADF;
 }
 
-#content div {
+#content section {
     display: none;
     margin: 10px;
+}
+
+.float-image {
+    float: left;
+    margin: 20px;
 }
