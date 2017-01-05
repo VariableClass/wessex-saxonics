@@ -2,3 +2,4 @@ image
 Flask==0.11.1
 google-cloud-storage==0.20.0
 webapp2
+google-auth==0.3.1

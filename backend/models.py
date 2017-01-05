@@ -5,6 +5,7 @@ from google.appengine.api import images
 class Image(ndb.Model):
     name = ndb.StringProperty()
     user_id = ndb.StringProperty()
+    filetype = ndb.StringProperty()
     height = ndb.IntegerProperty()
     width = ndb.IntegerProperty()
     bucket_name = ndb.StringProperty()

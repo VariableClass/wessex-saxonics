@@ -4,7 +4,7 @@ info:
   description: API for Wessex Saxonics Media Server
   version: "1.0.0"
 # the domain of the service
-host: backend.wessex-saxonics.appspot.com
+host: backend-dot-wessex-saxonics.appspot.com
 # array of all schemes that your API supports
 schemes:
   - https
@@ -146,3 +146,14 @@ securityDefinitions:
     type: apiKey
     in: query
     name: key
+
+  firebase:
+    authorizationUrl : "wessex-saxonics.appspot.com"
+    flow: "implicit"
+    type: "oauth2"
+    x-issuer: "https://securetoken.google.com/wessex-saxonics"
+    x-jwks_uri: "https://www.googleapis.com/service_accounts/v1/metadata/x509/securetoken@system.gserviceaccount.com"
+
+security:
+  - api_key: []
+  - firebase: []

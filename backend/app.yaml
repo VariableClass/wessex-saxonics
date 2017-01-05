@@ -17,5 +17,6 @@ libraries:
   version: latest
 
 env_variables:
-  ENDPOINTS_SERVICE_NAME: backend.wessex-saxonics.appspot.com
-  ENDPOINTS_SERVICE_VERSION: 2016-12-30r0
+  ENDPOINTS_SERVICE_NAME: backend-dot-wessex-saxonics.appspot.com
+  ENDPOINTS_SERVICE_VERSION: 2017-01-03r2
+  FIREBASE_PROJECT_ID: 'wessex-saxonics'

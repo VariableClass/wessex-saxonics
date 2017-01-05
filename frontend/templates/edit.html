@@ -15,9 +15,8 @@
 		</nav>
 
 		<section>
-			<p>{{user_image.name}}</p>
-			<div>
-                {% if edit_mode == 'false' %}
+            <p>{{user_image.name}}</p>
+            <div>
                 <form action="/edit" method="get" enctype="application/x-www-form-urlencoded">
                     <label for="change_dimensions">Dimensions: <b>{{ user_image.width }}x{{ user_image.height }}</b></label>
                     <input type="hidden" name="imageid" value="{{ user_image.name }}" />
@@ -25,7 +24,7 @@
                     <input type="submit" id="change_dimensions" value="Change" />
                 </form>
                 <a href="/delete?imageid={{user_image.name}}">Delete</a>
-                {% else %}
+
                 <form action="/edit" method="post" enctype="multipart/form-data">
                     <label for="scale_factor">Scale by </label>
                     <input name="scale_factor" id="scale_factor" type="number" min="0" required/>
@@ -36,7 +35,7 @@
                 </form>
                 <a href="/edit?imageid={{ user_image.name }}&edit=false">Cancel</a>
                 {% endif %}
-			</div>
+            </div>
             <br/>
             <img src="{{ user_image.public_url }}" width="{{user_image.width}}" height="{{user_image.height}}"/>
 		</section>

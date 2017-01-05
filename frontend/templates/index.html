@@ -20,7 +20,7 @@
         <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/1.0.0/firebaseui.css" />
         <script type="text/javascript">
           var uiConfig = {
-            signInSuccessUrl: '#',
+            signInSuccessUrl: '/',
             signInOptions: [
 
               firebase.auth.GoogleAuthProvider.PROVIDER_ID,
@@ -67,6 +67,17 @@
 
             <div id="upload-page">
                 <h2>Upload</h2>
+                <form id="upload-form" action="javascript:void(0)" enctype="multipart/form-data">
+                    <p>
+                        <label for="image_name">Image Name</label>
+                        <input name="image_name" id="image_name" type="text" size="20" required/>
+                    </p>
+                    <p>
+                        <label for="image_file">File:</label>
+                        <input name="image_file" id="image_file" type="file" accept="image/*" size="4" required/>
+                    </p>
+                    <input type="submit" value="Upload"/>
+                </form>
             </div>
 
             <div id="edit-page">
