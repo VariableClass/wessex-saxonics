@@ -11,7 +11,7 @@ from google.appengine.api import app_identity, users
 
 
 # Upload image to cloud storage bucket
-def upload_image_file(image, name, image_type):
+def upload_image_file(image, name, mime_type):
 
     # Define retry parameters
     write_retry_params = gcs.RetryParams(backoff_factor=1.1)
@@ -25,7 +25,7 @@ def upload_image_file(image, name, image_type):
     # Create new cloud storage file to write to
     gcs_file = gcs.open(filename,
                         'w',
-                        content_type=image_type,
+                        content_type=mime_type,
                         retry_params=write_retry_params,
                         options={'x-goog-acl': 'public-read'})
 

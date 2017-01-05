@@ -57,9 +57,8 @@ uploadForm.onsubmit = function(){
 
     reader.addEventListener("load", function () {
       var name = document.getElementById('image_name').value;
-      var filetype = document.getElementById('image_file').value.split('.').pop();
       var imageFile = reader.result;
-      wessexsaxonics.mediaserver.uploadImage(name, imageFile, filetype, 10, 10);
+      wessexsaxonics.mediaserver.uploadImage(name, imageFile, 10, 10);
     }, false);
 
     if (file) {
@@ -173,8 +172,7 @@ wessexsaxonics.mediaserver.listImages = function() {
                   var name = resp.items[i].name;
                   var width = resp.items[i].width;
                   var height = resp.items[i].height;
-                  var encoded_image = resp.items[i].image;
-                  var image = window.atob(encoded_image);
+                  var image = resp.items[i].image;
                   wessexsaxonics.mediaserver.print(name, image, width, height);
               }
           }
@@ -186,15 +184,14 @@ wessexsaxonics.mediaserver.listImages = function() {
 /**
  * Uploads image via the API.
  */
-wessexsaxonics.mediaserver.uploadImage = function(id, image, filetype, width, height) {
+wessexsaxonics.mediaserver.uploadImage = function(id, image, width, height) {
 
     firebase.auth().currentUser.getToken(true).then(function(idToken){
 
         // Define payload
         var jsonPayload = new Object();
         jsonPayload.name = id;
-        jsonPayload.image = window.btoa(image);
-        jsonPayload.filetype = filetype;
+        jsonPayload.image = image;
         jsonPayload.width = width;
         jsonPayload.height = height;
 

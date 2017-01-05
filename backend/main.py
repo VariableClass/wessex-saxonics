@@ -8,6 +8,7 @@ import imghdr
 import json
 import jwt
 import models
+import re
 import time
 from google.auth import exceptions
 from jwt.contrib.algorithms.py_ecdsa import ECAlgorithm
@@ -23,10 +24,9 @@ jwt.register_algorithm('ES256', ECAlgorithm(ECAlgorithm.SHA256))
 
 class Image(messages.Message):
     name = messages.StringField(1, required=True)
-    image = messages.BytesField(2, required=True)
-    filetype = messages.StringField(3, required=True)
-    height = messages.IntegerField(4)
-    width = messages.IntegerField(5)
+    image = messages.StringField(2, required=True)
+    height = messages.IntegerField(3)
+    width = messages.IntegerField(4)
 
 
 class ImageCollection(messages.Message):
@@ -121,12 +121,12 @@ class WessexSaxonicsApi(remote.Service):
                 # Retrieve image
                 image_file = crud.retrieve_image_file(image.name);
 
-                # Encode file
-                encoded_image = base64.b64encode(image_file);
+                # Encode image
+                base64_prefix = "data:" + image.mime_type + ";base64,";
+                encoded_image = base64_prefix + base64.b64encode(image_file);
 
                 ret_images.items.append(Image(name=image.name,
                                                 image=encoded_image,
-                                                filetype=image.filetype,
                                                 height=image.height,
                                                 width=image.width));
 
@@ -167,7 +167,6 @@ class WessexSaxonicsApi(remote.Service):
                 if image:
                     return Image(name=image.name,
                                  image=image.image,
-                                 filetype=filetype,
                                  height=image.height,
                                  width=image.width)
                 else:
@@ -202,16 +201,23 @@ class WessexSaxonicsApi(remote.Service):
 
         if user_id:
 
+            # Knock mime type off start of image base64 and store it
+            request_data = request.image.split(',');
+            mime_type = re.split('[:;]+', request_data[0])[1];
+
             image = models.Image(name=request.name,
                                 user_id=user_id,
-                                filetype=request.filetype,
+                                mime_type=mime_type,
                                 height=request.height,
                                 width=request.width,
                                 bucket_name="wessex-saxonics")
             image.put()
 
-            image = base64.b64decode(request.image)
-            crud.upload_image_file(image, request.name, request.filetype)
+            # Decode base64 image
+            image = request_data[1].decode('base64')
+
+            # Upload image to cloud storage
+            crud.upload_image_file(image, request.name, mime_type)
             return message_types.VoidMessage()
 
         # If user is not logged in
@@ -274,7 +280,6 @@ class WessexSaxonicsApi(remote.Service):
 
                 return Image(name=image.name,
                              image=image.image,
-                             filetype=image.filetype,
                              height=image.height,
                              width=image.width)
 
