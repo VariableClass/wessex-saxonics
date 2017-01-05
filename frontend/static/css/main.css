@@ -33,9 +33,11 @@ body {
 }
 
 #loading {
+    text-align: justify;
     position: absolute;
     top: 50%;
     left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 #content section {
@@ -52,4 +54,9 @@ body {
     margin-top: 25px;
     margin-right: 50px;
     margin-bottom: 25px;
+}
+
+#name-in-use {
+    display: none;
+    color: #ff0000;
 }

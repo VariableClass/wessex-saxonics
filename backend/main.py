@@ -216,6 +216,10 @@ class WessexSaxonicsApi(remote.Service):
 
         if user_id:
 
+            if len(request.name) == 0:
+                raise endpoints.BadRequestException(
+                    'Please enter a name for the file')
+
             if models.Image.get_image_by_user(request.name, user_id) is None:
 
                 # Knock mime type off start of image base64 and store it
@@ -230,10 +234,10 @@ class WessexSaxonicsApi(remote.Service):
                 image.put()
 
                 # Decode base64 image
-                image = request_data[1].decode('base64')
+                image_file = request_data[1].decode('base64')
 
                 # Upload image to cloud storage
-                crud.upload_image_file(image, request.name, mime_type)
+                crud.upload_image_file(image_file, request.name, mime_type)
                 return message_types.VoidMessage()
 
             else:

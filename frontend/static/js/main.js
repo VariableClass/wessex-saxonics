@@ -31,6 +31,11 @@ var loading = document.getElementById('loading');
 var uploadForm = document.getElementById('upload-form');
 var editForm = document.getElementById('edit-form');
 
+/*
+ * Labels
+ */
+var nameInUse = document.getElementById('name-in-use');
+
 /**
  * * Element click actions
  * */
@@ -76,6 +81,11 @@ uploadForm.onsubmit = function(){
       var img = new Image;
       img.onload = function() {
           wessexsaxonics.mediaserver.uploadImage(name, imageFile, img.width, img.height);
+
+          // Clear form
+          uploadForm.reset();
+
+          nameInUse.style.display = "none";
       }
 
       img.src = imageFile;
@@ -85,9 +95,6 @@ uploadForm.onsubmit = function(){
     if (file) {
       reader.readAsDataURL(file);
     }
-
-    // Clear form
-    uploadForm.reset();
 }
 
 editForm.onsubmit = function(){
@@ -235,7 +242,7 @@ wessexsaxonics.mediaserver.clearImages = function(){
  */
 wessexsaxonics.mediaserver.getImage = function(image_id) {
 
-    loading.style.visibility = "visible";
+    loading.style.display = "block";
 
     firebase.auth().currentUser.getToken(true).then(function(idToken){
         var xhr = new XMLHttpRequest();
@@ -268,7 +275,7 @@ wessexsaxonics.mediaserver.getImage = function(image_id) {
                   editPage.style.display = 'block';
               }
 
-              loading.style.visibility = "hidden";
+              loading.style.display = "none";
           }
         };
         xhr.send();
@@ -280,7 +287,7 @@ wessexsaxonics.mediaserver.getImage = function(image_id) {
  */
 wessexsaxonics.mediaserver.listImages = function() {
 
-    loading.style.visibility = "visible";
+    loading.style.display = "block";
 
     wessexsaxonics.mediaserver.clearImages();
 
@@ -308,7 +315,7 @@ wessexsaxonics.mediaserver.listImages = function() {
 
                   wessexsaxonics.mediaserver.setNoImagesMsg();
               }
-              loading.style.visibility = "hidden";
+              loading.style.display = "none";
           }
         };
         xhr.send();
@@ -320,7 +327,7 @@ wessexsaxonics.mediaserver.listImages = function() {
  */
 wessexsaxonics.mediaserver.uploadImage = function(id, image, width, height) {
 
-    loading.style.visibility = "visible";
+    loading.style.display = "block";
 
     firebase.auth().currentUser.getToken(true).then(function(idToken){
 
@@ -340,8 +347,17 @@ wessexsaxonics.mediaserver.uploadImage = function(id, image, width, height) {
         xhr.setRequestHeader("Content-type", "application/json");
         xhr.onreadystatechange = function() {
           if (xhr.readyState == XMLHttpRequest.DONE){
-              wessexsaxonics.mediaserver.loadMainPage();
-              loading.style.visibility = "hidden";
+
+              if (xhr.status == 400){
+
+                  nameInUse.style.display = "block";
+
+              } else {
+
+                  wessexsaxonics.mediaserver.loadMainPage();
+              }
+
+              loading.style.display = "none";
           }
         };
         xhr.send(JSON.stringify(jsonPayload));
@@ -353,7 +369,7 @@ wessexsaxonics.mediaserver.uploadImage = function(id, image, width, height) {
  */
 wessexsaxonics.mediaserver.editImage = function(image_id, scaleFactor){
 
-    loading.style.visibility = "visible";
+    loading.style.display = "block";
 
     firebase.auth().currentUser.getToken(true).then(function(idToken){
 
@@ -376,7 +392,7 @@ wessexsaxonics.mediaserver.editImage = function(image_id, scaleFactor){
               var height = resp.height;
               wessexsaxonics.mediaserver.setEditPageData(name, image, width, height);
               wessexsaxonics.mediaserver.loadMainPage();
-              loading.style.visibility = "hidden";
+              loading.style.display = "none";
           }
         };
         xhr.send(JSON.stringify(jsonPayload));
@@ -388,7 +404,7 @@ wessexsaxonics.mediaserver.editImage = function(image_id, scaleFactor){
  */
 wessexsaxonics.mediaserver.deleteImage = function(image_id) {
 
-    loading.style.visibility = "visible";
+    loading.style.display = "block";
 
     firebase.auth().currentUser.getToken(true).then(function(idToken){
         var xhr = new XMLHttpRequest();
@@ -399,7 +415,7 @@ wessexsaxonics.mediaserver.deleteImage = function(image_id) {
         xhr.onreadystatechange = function() {
           if (xhr.readyState == XMLHttpRequest.DONE){
               wessexsaxonics.mediaserver.loadMainPage();
-              loading.style.visibility = "hidden";
+              loading.style.display = "none";
           }
         };
         xhr.send();
