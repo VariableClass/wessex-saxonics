@@ -17,7 +17,7 @@ def upload_image_file(image, name, mime_type):
     write_retry_params = gcs.RetryParams(backoff_factor=1.1)
 
     # Retrieve default bucket
-    bucket_name = _retrieve_default_bucket()
+    bucket_name = retrieve_default_bucket()
 
     # Define filename
     filename = '/' + bucket_name + '/' + name
@@ -42,7 +42,7 @@ def upload_image_file(image, name, mime_type):
 def retrieve_image_file(filename):
 
     # Retrieve default bucket
-    bucket_name = _retrieve_default_bucket()
+    bucket_name = retrieve_default_bucket()
 
     # Open image file from cloud storage to read from
     gcs_file = gcs.open('/' + bucket_name + '/' + filename)
@@ -61,14 +61,18 @@ def delete_file(filename):
 
     # Try to delete the file, ignore if file is not found
     try:
-        gcs.delete(filename)
+
+        # Retrieve default bucket
+        bucket_name = retrieve_default_bucket()
+
+        gcs.delete('/' + bucket_name + '/' + filename)
 
     except gcs.NotFoundError:
         print (filename + 'not found')
 
 
 # Retrieve default bucket
-def _retrieve_default_bucket():
+def retrieve_default_bucket():
 
     # Retrieve default bucket
     return os.environ.get('BUCKET_NAME', app_identity.get_default_gcs_bucket_name())

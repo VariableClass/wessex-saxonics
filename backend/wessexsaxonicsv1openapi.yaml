@@ -28,7 +28,7 @@ paths:
           description: Unauthorized
         default:
           description: Unexpected error
-          
+
     post:
       summary: Upload Image
       operationId: imageUpload
@@ -50,17 +50,19 @@ paths:
           description: Custom image height.
           type: integer
           format: int64
-        
+
       tags:
         - Images
       responses:
         204:
           description: Empty success response
+        400:
+          description: Name already in use
         401:
           description: Unauthorized
         default:
           description: Unexpected error
-          
+
   /images/{image_id}:
     get:
       summary: Image
@@ -82,7 +84,7 @@ paths:
           description: Unauthorized
         default:
           description: Unexpected error
-    
+
     post:
       summary: Update Image
       operationId: imageEdit
@@ -118,7 +120,7 @@ paths:
           description: Unauthorized
         default:
           description: Unexpected error
-        
+
     delete:
       summary: Delete Image
       operationId: imageDelete
@@ -141,7 +143,7 @@ paths:
           description: Unexpected error
 
 securityDefinitions:
-  
+
   api_key:
     type: apiKey
     in: query

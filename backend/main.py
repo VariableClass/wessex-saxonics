@@ -33,6 +33,12 @@ class ImageCollection(messages.Message):
     items = messages.MessageField(Image, 1, repeated=True)
 
 
+class EditMessage(messages.Message):
+    scale_factor = messages.IntegerField(1)
+    height = messages.IntegerField(2)
+    width = messages.IntegerField(3)
+
+
 def get_user_from_token(encoded_token, certs=None):
 
     if certs is None:
@@ -162,11 +168,20 @@ class WessexSaxonicsApi(remote.Service):
         if user_id:
 
             try:
+                # Retrieve image metadata
                 image = models.Image.get_image_by_user(request.image_id, user_id)
 
                 if image:
+
+                    # Retrieve image
+                    image_file = crud.retrieve_image_file(request.image_id);
+
+                    # Encode image
+                    base64_prefix = "data:" + image.mime_type + ";base64,";
+                    encoded_image = base64_prefix + base64.b64encode(image_file);
+
                     return Image(name=image.name,
-                                 image=image.image,
+                                 image=encoded_image,
                                  height=image.height,
                                  width=image.width)
                 else:
@@ -201,24 +216,29 @@ class WessexSaxonicsApi(remote.Service):
 
         if user_id:
 
-            # Knock mime type off start of image base64 and store it
-            request_data = request.image.split(',');
-            mime_type = re.split('[:;]+', request_data[0])[1];
+            if models.Image.get_image_by_user(request.name, user_id) is None:
 
-            image = models.Image(name=request.name,
-                                user_id=user_id,
-                                mime_type=mime_type,
-                                height=request.height,
-                                width=request.width,
-                                bucket_name="wessex-saxonics")
-            image.put()
+                # Knock mime type off start of image base64 and store it
+                request_data = request.image.split(',');
+                mime_type = re.split('[:;]+', request_data[0])[1];
 
-            # Decode base64 image
-            image = request_data[1].decode('base64')
+                image = models.Image(name=request.name,
+                                    user_id=user_id,
+                                    mime_type=mime_type,
+                                    height=request.height,
+                                    width=request.width)
+                image.put()
 
-            # Upload image to cloud storage
-            crud.upload_image_file(image, request.name, mime_type)
-            return message_types.VoidMessage()
+                # Decode base64 image
+                image = request_data[1].decode('base64')
+
+                # Upload image to cloud storage
+                crud.upload_image_file(image, request.name, mime_type)
+                return message_types.VoidMessage()
+
+            else:
+                raise endpoints.BadRequestException(
+                    request.name + " already in use. Please use another name.")
 
         # If user is not logged in
         else:
@@ -228,11 +248,8 @@ class WessexSaxonicsApi(remote.Service):
                 'Please provide user credentials')
 
     EDIT_IMAGE_RESOURCE = endpoints.ResourceContainer(
-        message_types.VoidMessage,
-        image_id=messages.StringField(1, required=True),
-        scale_factor=messages.IntegerField(2),
-        height=messages.IntegerField(3),
-        width=messages.IntegerField(4)
+        EditMessage,
+        image_id=messages.StringField(1, required=True)
     )
 
     @endpoints.method(
@@ -259,6 +276,10 @@ class WessexSaxonicsApi(remote.Service):
                      raise endpoints.BadRequestException(
                         'Please provide image height and width OR scale factor, not both.')
 
+                if request.scale_factor is None and request.height is None and request.width is None:
+                    raise endpoints.BadRequestException(
+                       'Please provide image height, width or scale factor.')
+
                 if request.scale_factor:
 
                     sf = float(request.scale_factor)
@@ -278,8 +299,15 @@ class WessexSaxonicsApi(remote.Service):
 
                 image.put()
 
+                # Retrieve image
+                image_file = crud.retrieve_image_file(request.image_id);
+
+                # Encode image
+                base64_prefix = "data:" + image.mime_type + ";base64,";
+                encoded_image = base64_prefix + base64.b64encode(image_file);
+
                 return Image(name=image.name,
-                             image=image.image,
+                             image=encoded_image,
                              height=image.height,
                              width=image.width)
 
@@ -315,7 +343,8 @@ class WessexSaxonicsApi(remote.Service):
                 models.Image.delete_user_image(request.image_id, user_id)
 
                 # Delete image from cloud storage
-                # crud.delete_file('/' + user_image.bucket_name + '/' + user_image.name)
+                crud.delete_file(request.image_id)
+
                 return message_types.VoidMessage()
 
             except (IndexError, TypeError):

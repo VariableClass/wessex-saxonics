@@ -1,3 +1,5 @@
+import crud
+
 from google.appengine.ext import blobstore, ndb
 from google.appengine.api import images
 
@@ -8,19 +10,18 @@ class Image(ndb.Model):
     mime_type = ndb.StringProperty()
     height = ndb.IntegerProperty()
     width = ndb.IntegerProperty()
-    bucket_name = ndb.StringProperty()
 
     # Retrieve public URL for image
     @property
     def public_url(self):
 
-        if self.bucket_name is None or self.name is None:
+        if self.name is None:
             return None
 
         else:
 
             # Build blobstore type filename
-            blobstore_filename = '/gs/' + self.bucket_name + '/' + self.name
+            blobstore_filename = '/gs/' + crud.retrieve_default_bucket() + '/' + self.name
 
             # Get blobstore key
             key = blobstore.create_gs_key(blobstore_filename)
@@ -31,13 +32,13 @@ class Image(ndb.Model):
     @property
     def thumbnail(self):
 
-        if self.bucket_name is None or self.name is None:
+        if self.name is None:
             return None
 
         else:
 
             # Build blobstore type filename
-            blobstore_filename = '/gs/' + self.bucket_name + '/' + self.name
+            blobstore_filename = '/gs/' + crud.retrieve_default_bucket() + '/' + self.name
 
             # Get blobstore key
             key = blobstore.create_gs_key(blobstore_filename)

@@ -3,6 +3,8 @@
     <head>
         <title>Wessex Saxonics Media Server</title>
 
+        <meta http-equiv="Cache-control" content="no-cache">
+
         <!-- Initialise Firebase Authentication -->
         <script src="https://www.gstatic.com/firebasejs/3.6.2/firebase.js"></script>
         <script src="https://www.gstatic.com/firebasejs/3.6.2/firebase-app.js"></script>
@@ -52,6 +54,7 @@
         <ul id="navbar">
             <li><a id="home" href='javascript:void(0)' class="active"><b>Wessex Saxonics Media Server POC</b></a></li>
             <li><a id="upload" href="javascript:void(0)">Upload</a></li>
+            <li><a id="edit" href="javascript:void(0)">Edit</a></li>
             <li style="float:right"><a id="sign-out" href="javascript:void(0)">Sign Out</a></li>
         </ul>
 
@@ -60,14 +63,17 @@
         </div>
 
         <div id="content">
+
+            <p id="loading">Loading...</p>
+
             <section id="view-page">
                 <h2>View Images</h2>
-                <div id="images"></div>
+                <div id="images" class="section-content"></div>
             </section>
 
             <section id="upload-page">
                 <h2>Upload</h2>
-                <form id="upload-form" action="javascript:void(0)" enctype="multipart/form-data">
+                <form id="upload-form" class="section-content" action="javascript:void(0)" enctype="multipart/form-data">
                     <p>
                         <label for="image_name">Image Name</label>
                         <input name="image_name" id="image_name" type="text" size="20" required/>
@@ -81,7 +87,24 @@
             </section>
 
             <section id="edit-page">
-                <h2>Edit Image</h2>
+                <h2 id="edit-title">Editing {0}</h2>
+                <div class="section-content">
+                    <form id="edit-form" action="javascript:void(0)" enctype="multipart/form-data">
+                        <p>
+                            <label for="scale-factor">Scale by </label>
+                            <input id="image-id" hidden />
+                            <input name="scale-factor" id="scale-factor" type="number" min="0" style="text-align: right; width: 75px;" required/>
+                            %
+                        </p>
+                        <p>
+                            <input type="submit" value="Save"/>
+                        </p>
+                    </form>
+                    <br/>
+                    <a id="delete-image" href="javascript:void(0)">Delete</a>
+                    <br/>
+                    <img id="edit-image"/>
+                </div>
             </section>
         </div>
     </body>

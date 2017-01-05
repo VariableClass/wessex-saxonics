@@ -14,6 +14,7 @@ wessexsaxonics.mediaserver = wessexsaxonics.mediaserver || {};
  * */
 var home = document.getElementById('home');
 var upload = document.getElementById('upload');
+var edit = document.getElementById('edit');
 var signout = document.getElementById('sign-out');
 
 /**
@@ -22,11 +23,13 @@ var signout = document.getElementById('sign-out');
 var viewPage = document.getElementById('view-page');
 var uploadPage = document.getElementById('upload-page');
 var editPage = document.getElementById('edit-page');
+var loading = document.getElementById('loading');
 
 /**
  * Forms
  */
 var uploadForm = document.getElementById('upload-form');
+var editForm = document.getElementById('edit-form');
 
 /**
  * * Element click actions
@@ -42,6 +45,14 @@ upload.onclick = function(){
     upload.className = active;
     viewPage.style.display = 'none';
     uploadPage.style.display = 'block';
+    editPage.style.display = 'none';
+}
+
+edit.onclick = function(){
+
+    var image_id = window.prompt("Please enter the ID of the image you wish to edit");
+
+    wessexsaxonics.mediaserver.loadEditPage(image_id);
 }
 
 signout.onclick = function(){
@@ -74,6 +85,19 @@ uploadForm.onsubmit = function(){
     if (file) {
       reader.readAsDataURL(file);
     }
+
+    // Clear form
+    uploadForm.reset();
+}
+
+editForm.onsubmit = function(){
+
+    var imageId = document.getElementById('image-id').value;
+    var scaleFactor = document.getElementById('scale-factor').value;
+
+    wessexsaxonics.mediaserver.editImage(imageId, scaleFactor);
+
+    editForm.reset();
 }
 
 wessexsaxonics.mediaserver.loadMainPage = function(){
@@ -85,6 +109,12 @@ wessexsaxonics.mediaserver.loadMainPage = function(){
     home.className = active;
     viewPage.style.display = 'block';
     uploadPage.style.display = 'none';
+    editPage.style.display = 'none';
+}
+
+wessexsaxonics.mediaserver.loadEditPage = function(imageId){
+
+    wessexsaxonics.mediaserver.getImage(imageId);
 }
 
 wessexsaxonics.mediaserver.deactivateAllElements = function(){
@@ -120,25 +150,69 @@ firebase.auth().onAuthStateChanged(function(user) {
  * Prints a image to the image list.
  * param {Object} image Image to display.
  */
-wessexsaxonics.mediaserver.print = function(name, image, width, height) {
+wessexsaxonics.mediaserver.addImageToView = function(name, image, width, height) {
+
   var imageDiv = document.createElement("div");
   imageDiv.className = "float-image";
 
   var html_image = document.createElement("img");
   html_image.src = image;
   html_image.alt = name;
+  html_image.width = 200;
+
+  var labelDiv = document.createElement("div");
 
   var nameLabel = document.createElement("p");
-  nameLabel.innerHTML = "<b>Name:</b> " + name;
+  nameLabel.innerHTML = "<b>ID:</b> " + name;
 
   var dimensionsLabel = document.createElement("p");
   dimensionsLabel.innerHTML = "<b>Width:</b> " + width + ", <b>Height:</b> " + height;
 
+  var editLink = document.createElement("a");
+  editLink.innerHTML = "Edit";
+  editLink.href = "javascript:void(0)";
+  editLink.addEventListener("click", function(){
+      wessexsaxonics.mediaserver.loadEditPage(name);
+  }, false);
+
+  labelDiv.appendChild(nameLabel);
+  labelDiv.appendChild(dimensionsLabel);
+  labelDiv.appendChild(editLink);
+
   imageDiv.appendChild(html_image);
-  imageDiv.appendChild(nameLabel);
-  imageDiv.appendChild(dimensionsLabel);
+  imageDiv.appendChild(labelDiv);
   document.getElementById("images").appendChild(imageDiv);
 };
+
+wessexsaxonics.mediaserver.setNoImagesMsg = function(){
+
+    var noImages = document.createElement("p");
+    noImages.innerHTML = "No images to display";
+
+    document.getElementById("images").appendChild(noImages);
+}
+
+wessexsaxonics.mediaserver.setEditPageData = function(name, image, width, height){
+
+    var title = document.getElementById("edit-title");
+    title.innerHTML = "Editing " + name;
+
+    var imageId = document.getElementById("image-id");
+    imageId.value = name;
+
+    var html_image = document.getElementById("edit-image");
+    html_image.src = image;
+    html_image.alt = name;
+    html_image.width = width;
+    html_image.height = height;
+
+    var deleteLink = document.getElementById("delete-image");
+    deleteLink.addEventListener("click", function(){
+
+        wessexsaxonics.mediaserver.deleteImage(name);
+
+    }, false);
+}
 
 /**
  * Clear images from image list.
@@ -159,21 +233,54 @@ wessexsaxonics.mediaserver.clearImages = function(){
  * Gets a specific image via the API.
  * @param {string} id ID of the image.
  */
-wessexsaxonics.mediaserver.getImage = function(idToken, user_id) {
+wessexsaxonics.mediaserver.getImage = function(image_id) {
 
-  // Execute HTTP request
-  gapi.client.wessexsaxonics.image.get({"headers": {"Authorization": "Bearer " + idToken },"image_id": user_id}).execute(
-      function(resp) {
-        if (!resp.code) {
-          wessexsaxonics.mediaserver.print(resp);
-        }
-      });
+    loading.style.visibility = "visible";
+
+    firebase.auth().currentUser.getToken(true).then(function(idToken){
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET',
+          'https://backend-dot-wessex-saxonics.appspot.com/_ah/api/wessexsaxonics/v1/images/' + image_id);
+        xhr.setRequestHeader('Authorization',
+          'Bearer ' + idToken);
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState == XMLHttpRequest.DONE){
+
+              if (xhr.status == "404"){
+
+                  alert("No image found for ID: " + image_id);
+                  wessexsaxonics.mediaserver.loadMainPage();
+
+              } else {
+
+                  resp = JSON.parse(xhr.responseText);
+                  var name = resp.name;
+                  var image = resp.image;
+                  var width = resp.width;
+                  var height = resp.height
+
+                  wessexsaxonics.mediaserver.setEditPageData(name, image, width, height);
+
+                  wessexsaxonics.mediaserver.deactivateAllElements();
+                  edit.className = active;
+                  viewPage.style.display = 'none';
+                  uploadPage.style.display = 'none';
+                  editPage.style.display = 'block';
+              }
+
+              loading.style.visibility = "hidden";
+          }
+        };
+        xhr.send();
+    });
 };
 
 /**
  * Lists images via the API.
  */
 wessexsaxonics.mediaserver.listImages = function() {
+
+    loading.style.visibility = "visible";
 
     wessexsaxonics.mediaserver.clearImages();
 
@@ -187,13 +294,21 @@ wessexsaxonics.mediaserver.listImages = function() {
           if (xhr.readyState == XMLHttpRequest.DONE){
               resp = JSON.parse(xhr.responseText);
               resp.items = resp.items || [];
-              for (var i = 0; i < resp.items.length; i++) {
-                  var name = resp.items[i].name;
-                  var width = resp.items[i].width;
-                  var height = resp.items[i].height;
-                  var image = resp.items[i].image;
-                  wessexsaxonics.mediaserver.print(name, image, width, height);
+
+              if (resp.items.length > 0) {
+
+                  for (var i = 0; i < resp.items.length; i++) {
+                      var name = resp.items[i].name;
+                      var image = resp.items[i].image;
+                      var width = resp.items[i].width;
+                      var height = resp.items[i].height;
+                      wessexsaxonics.mediaserver.addImageToView(name, image, width, height);
+                  }
+              } else {
+
+                  wessexsaxonics.mediaserver.setNoImagesMsg();
               }
+              loading.style.visibility = "hidden";
           }
         };
         xhr.send();
@@ -204,6 +319,8 @@ wessexsaxonics.mediaserver.listImages = function() {
  * Uploads image via the API.
  */
 wessexsaxonics.mediaserver.uploadImage = function(id, image, width, height) {
+
+    loading.style.visibility = "visible";
 
     firebase.auth().currentUser.getToken(true).then(function(idToken){
 
@@ -221,24 +338,72 @@ wessexsaxonics.mediaserver.uploadImage = function(id, image, width, height) {
         xhr.setRequestHeader('Authorization',
           'Bearer ' + idToken);
         xhr.setRequestHeader("Content-type", "application/json");
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState == XMLHttpRequest.DONE){
+              wessexsaxonics.mediaserver.loadMainPage();
+              loading.style.visibility = "hidden";
+          }
+        };
         xhr.send(JSON.stringify(jsonPayload));
-    }).then(function(){
-
-        wessexsaxonics.mediaserver.loadMainPage();
     });
 };
 
 /**
+ * Updates image metadata
+ */
+wessexsaxonics.mediaserver.editImage = function(image_id, scaleFactor){
+
+    loading.style.visibility = "visible";
+
+    firebase.auth().currentUser.getToken(true).then(function(idToken){
+
+        // Define payload
+        var jsonPayload = new Object();
+        jsonPayload.scale_factor = Number(scaleFactor);
+
+        // Define request
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST',
+          'https://backend-dot-wessex-saxonics.appspot.com/_ah/api/wessexsaxonics/v1/images/' + image_id);
+        xhr.setRequestHeader('Authorization',
+          'Bearer ' + idToken);
+        xhr.setRequestHeader("Content-type", "application/json");
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState == XMLHttpRequest.DONE){
+              var name = resp.name;
+              var image = resp.image;
+              var width = resp.width;
+              var height = resp.height;
+              wessexsaxonics.mediaserver.setEditPageData(name, image, width, height);
+              wessexsaxonics.mediaserver.loadMainPage();
+              loading.style.visibility = "hidden";
+          }
+        };
+        xhr.send(JSON.stringify(jsonPayload));
+    });
+}
+
+/**
  * Deletes an image
  */
-wessexsaxonics.mediaserver.deleteImage = function(id) {
-     gapi.client.wessexsaxonics.images.delete({'image_id': id}).execute(
-        function(resp) {
-            if (!resp.code){
-                wessexsaxonics.mediaserver.loadMainPage();
-            }
-        }
-     );
+wessexsaxonics.mediaserver.deleteImage = function(image_id) {
+
+    loading.style.visibility = "visible";
+
+    firebase.auth().currentUser.getToken(true).then(function(idToken){
+        var xhr = new XMLHttpRequest();
+        xhr.open('DELETE',
+          'https://backend-dot-wessex-saxonics.appspot.com/_ah/api/wessexsaxonics/v1/images/' + image_id);
+        xhr.setRequestHeader('Authorization',
+          'Bearer ' + idToken);
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState == XMLHttpRequest.DONE){
+              wessexsaxonics.mediaserver.loadMainPage();
+              loading.style.visibility = "hidden";
+          }
+        };
+        xhr.send();
+    });
 }
 
 
@@ -276,7 +441,9 @@ wessexsaxonics.mediaserver.init = function() {
         'discoveryDocs': [],
         'clientId': '552722976411-cdl5bddfvaf0fh9djhvetr47j59prgp8.apps.googleusercontent.com',
         'scope': 'user.email',
-      });
+    }).then(function() {
+        wessexsaxonics.mediaserver.loadMainPage();
+    });
   }
 
   gapi.client.load("wessexsaxonics", "v1", callback, 'https://backend-dot-wessex-saxonics.appspot.com/_ah/api');
