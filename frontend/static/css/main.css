@@ -33,6 +33,7 @@ body {
 }
 
 #loading-screen {
+    display: none;
     background-color: #000000;
     opacity: 0.6;
     height:100vh;
@@ -40,6 +41,7 @@ body {
 }
 
 #loading-text {
+    display: none;
     color: #ffffff;
     text-align: justify;
     position: absolute;
