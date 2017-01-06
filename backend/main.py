@@ -125,7 +125,7 @@ class WessexSaxonicsApi(remote.Service):
             for image in images:
 
                 # Retrieve image
-                image_file = crud.retrieve_image_file(image.name);
+                image_file = crud.retrieve_image_file(user_id + "/" + image.name);
 
                 # Encode image
                 base64_prefix = "data:" + image.mime_type + ";base64,";
@@ -174,7 +174,7 @@ class WessexSaxonicsApi(remote.Service):
                 if image:
 
                     # Retrieve image
-                    image_file = crud.retrieve_image_file(request.image_id);
+                    image_file = crud.retrieve_image_file(user_id + "/" + request.image_id);
 
                     # Encode image
                     base64_prefix = "data:" + image.mime_type + ";base64,";
@@ -237,7 +237,7 @@ class WessexSaxonicsApi(remote.Service):
                 image_file = request_data[1].decode('base64')
 
                 # Upload image to cloud storage
-                crud.upload_image_file(image_file, request.name, mime_type)
+                crud.upload_image_file(image_file, user_id + "/" + request.name, mime_type)
                 return message_types.VoidMessage()
 
             else:
