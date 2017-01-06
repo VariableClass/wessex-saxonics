@@ -66,6 +66,10 @@ body {
     margin-bottom: 25px;
 }
 
+.float-image img {
+    cursor: pointer;
+}
+
 #name-in-use {
     display: none;
     color: #ff0000;

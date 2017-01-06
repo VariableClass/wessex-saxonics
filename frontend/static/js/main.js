@@ -465,6 +465,10 @@ wessexsaxonics.mediaserver.view.addImageToGrid = function(name, image, width, he
     html_image.src = image;
     html_image.alt = name;
     html_image.width = 200;
+    html_image.addEventListener("click", function(){
+
+        wessexsaxonics.mediaserver.edit.loadPage(name);
+    }, false);
 
     // Create labels div
     var labelDiv = document.createElement("div");
