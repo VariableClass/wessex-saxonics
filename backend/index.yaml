@@ -1,0 +1,8 @@
+indexes:
+
+- kind: Image
+  properties:
+  - name: user_id
+  - name: name
+    direction: asc
+

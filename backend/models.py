@@ -1,5 +1,4 @@
 import crud
-
 from google.appengine.ext import blobstore, ndb
 from google.appengine.api import images
 
@@ -48,7 +47,7 @@ class Image(ndb.Model):
 
     @classmethod
     def get_all_by_user(cls, user_id):
-        return cls.query(cls.user_id == user_id)
+        return cls.query(cls.user_id == user_id).order(cls.name)
 
     @classmethod
     def get_image_by_user(cls, name, user_id):
