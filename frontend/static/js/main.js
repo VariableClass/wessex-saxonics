@@ -194,7 +194,7 @@ wessexsaxonics.mediaserver.api.getImage = function(image_id) {
                     resp = JSON.parse(xhr.responseText);
 
                     // Set Edit page data
-                    wessexsaxonics.mediaserver.edit.setPageData(resp.name, resp.image, resp.width, resp.height, resp.auto, resp.rotatedDegrees, resp.flipv, resp.fliph);
+                    wessexsaxonics.mediaserver.edit.setPageData(resp.name, resp.image, resp.width, resp.height, resp.metadata, resp.auto, resp.rotatedDegrees, resp.flipv, resp.fliph);
 
                     // Select Edit nav item
                     wessexsaxonics.mediaserver.navigation.selectNavItem(editNav);
@@ -377,7 +377,7 @@ wessexsaxonics.mediaserver.api.editImage = function(image_id, scaleFactor, auto,
                     resp = JSON.parse(xhr.responseText);
 
                     // Set Edit page data
-                    wessexsaxonics.mediaserver.edit.setPageData(resp.name, resp.image, resp.width, resp.height, resp.auto, resp.rotatedDegrees, resp.flipv, resp.fliph);
+                    wessexsaxonics.mediaserver.edit.setPageData(resp.name, resp.image, resp.width, resp.height, resp.metadata, resp.auto, resp.rotatedDegrees, resp.flipv, resp.fliph);
 
                     // Select Edit nav item
                     wessexsaxonics.mediaserver.navigation.selectNavItem(editNav);
@@ -694,6 +694,9 @@ var imageId = document.getElementById("image-id");
 // Edit form
 var editForm = document.getElementById('edit-form');
 
+// Metadata div
+var metadataDiv = document.getElementById('metadata');
+
 // Get auto fix from form
 var autoFix = document.getElementById('auto-fix');
 
@@ -726,7 +729,7 @@ var html_image = document.getElementById("edit-image");
 var deleteLink = document.getElementById("delete-image");
 
 // Populates page with data
-wessexsaxonics.mediaserver.edit.setPageData = function(name, image, width, height, auto, rotatedDegrees, flipv, fliph){
+wessexsaxonics.mediaserver.edit.setPageData = function(name, image, width, height, metadata, auto, rotatedDegrees, flipv, fliph){
 
     // Set title
     editTitle.innerHTML = "Editing " + name;
@@ -739,6 +742,9 @@ wessexsaxonics.mediaserver.edit.setPageData = function(name, image, width, heigh
 
     // Set scale factor value to default
     scaleFactor.value = 0;
+
+    // Populate metadata with appropriate fields
+    metadataDiv.appendChild(wessexsaxonics.mediaserver.edit.generateMetadataFields(metadata));
 
     // Set degrees rotated value
     degreesToRotate.setAttribute("value", Number(rotatedDegrees));
@@ -780,4 +786,50 @@ wessexsaxonics.mediaserver.edit.clearPageData = function() {
     html_image.alt = "";
     html_image.width = 0;
     html_image.height = 0;
+}
+
+// Returns a div containing metadata editing fields
+wessexsaxonics.mediaserver.edit.generateMetadataFields = function(metadata) {
+
+    // Retrieve JSON object from string
+    metadataJson = JSON.parse(metadata);
+
+    // Create a div to append edit fields to
+    var div = document.createElement('div');
+
+    // For each metadata item
+    for (var i = 0, len = Object.keys(metadataJson).length; i < len; ++i) {
+
+        // Get JSON key
+        key = Object.keys(metadataJson)[i];
+
+        // Create an edit field
+        div.appendChild(wessexsaxonics.mediaserver.edit.buildEditField(key, metadataJson[key]));
+    }
+
+    return div;
+}
+
+wessexsaxonics.mediaserver.edit.buildEditField = function(key, value){
+
+    // Create div to hold label and input field
+    var inputDiv = document.createElement('div');
+
+    // Create label to identify input field
+    var label = document.createElement('label');
+    label.for = key;
+    label.innerHTML = key + ":";
+
+    // Create input field to display current value/receive new value
+    var input = document.createElement('input');
+    input.type = "text";
+    input.id = key;
+    input.name = key;
+    input.value = value;
+
+    // Append label and input field to div
+    inputDiv.appendChild(label);
+    inputDiv.appendChild(input);
+
+    return inputDiv;
 }
