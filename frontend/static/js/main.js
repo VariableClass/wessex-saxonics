@@ -28,6 +28,8 @@ var loadingText = document.getElementById('loading-text');
 // Puts the application UI into a wait state
 wessexsaxonics.mediaserver.startWait = function(){
 
+    wessexsaxonics.mediaserver.navigation.hideAllPages();
+
     loadingScreen.style.display = DISPLAYED;
     loadingText.style.display = DISPLAYED;
 }
@@ -192,7 +194,7 @@ wessexsaxonics.mediaserver.api.getImage = function(image_id) {
                     resp = JSON.parse(xhr.responseText);
 
                     // Set Edit page data
-                    wessexsaxonics.mediaserver.edit.setPageData(resp.name, resp.image, resp.width, resp.height);
+                    wessexsaxonics.mediaserver.edit.setPageData(resp.name, resp.image, resp.width, resp.height, resp.auto, resp.rotatedDegrees, resp.flipv, resp.fliph);
 
                     // Select Edit nav item
                     wessexsaxonics.mediaserver.navigation.selectNavItem(editNav);
@@ -329,9 +331,9 @@ wessexsaxonics.mediaserver.api.uploadImage = function(id, image, width, height) 
 };
 
 // Edits image metadata
-wessexsaxonics.mediaserver.api.editImage = function(image_id, scaleFactor){
+wessexsaxonics.mediaserver.api.editImage = function(image_id, scaleFactor, auto, degreesToRotate, flipv, fliph){
 
-    // Put UI in wait state
+    // Put UI into wait state
     wessexsaxonics.mediaserver.startWait();
 
     // Retrieve current user token
@@ -340,6 +342,10 @@ wessexsaxonics.mediaserver.api.editImage = function(image_id, scaleFactor){
         // Define payload
         var jsonPayload = new Object();
         jsonPayload.scale_factor = Number(scaleFactor);
+        jsonPayload.auto = auto;
+        jsonPayload.degreesToRotate = Number(degreesToRotate);
+        jsonPayload.flipv = flipv;
+        jsonPayload.fliph = fliph
 
         // Create new request
         var xhr = new XMLHttpRequest();
@@ -359,8 +365,26 @@ wessexsaxonics.mediaserver.api.editImage = function(image_id, scaleFactor){
             // If request has completed
             if (xhr.readyState == XMLHttpRequest.DONE){
 
-                // Load main page
-                wessexsaxonics.mediaserver.view.loadPage();
+                // If request status not 200
+                if (xhr.status != 200){
+
+                    // Load upload page
+                    wessexsaxonics.mediaserver.view.loadPage();
+
+                } else {    // Else if request status is 200
+
+                    // Parse response JSON
+                    resp = JSON.parse(xhr.responseText);
+
+                    // Set Edit page data
+                    wessexsaxonics.mediaserver.edit.setPageData(resp.name, resp.image, resp.width, resp.height, resp.auto, resp.rotatedDegrees, resp.flipv, resp.fliph);
+
+                    // Select Edit nav item
+                    wessexsaxonics.mediaserver.navigation.selectNavItem(editNav);
+
+                    // Display Edit page
+                    wessexsaxonics.mediaserver.navigation.displayPage(editPage);
+                }
 
                 // Terminate UI wait state
                 wessexsaxonics.mediaserver.endWait();
@@ -670,17 +694,26 @@ var imageId = document.getElementById("image-id");
 // Edit form
 var editForm = document.getElementById('edit-form');
 
+// Get auto fix from form
+var autoFix = document.getElementById('auto-fix');
+
+// Form scale factor input element
+var scaleFactor = document.getElementById('scale-factor');
+
+// Get degrees to rotate from form
+var degreesToRotate = document.getElementById('degrees-to-rotate');
+
+// Get auto fix from form
+var flipVertically = document.getElementById('flip-vertically');
+
+// Get auto fix from form
+var flipHorizontally = document.getElementById('flip-horizontally');
+
 // Edit form onsubmit event
 editForm.onsubmit = function(){
 
-    // Get image ID from form
-    var imageId = document.getElementById('image-id').value;
-
-    // Get scale factor from form
-    var scaleFactor = document.getElementById('scale-factor').value;
-
     // Submit API call passing image ID and scale factor
-    wessexsaxonics.mediaserver.api.editImage(imageId, scaleFactor);
+    wessexsaxonics.mediaserver.api.editImage(imageId.value, scaleFactor.value, autoFix.checked, degreesToRotate.value, flipVertically.checked, flipHorizontally.checked);
 
     // Clear page
     wessexsaxonics.mediaserver.edit.clearPageData();
@@ -693,13 +726,26 @@ var html_image = document.getElementById("edit-image");
 var deleteLink = document.getElementById("delete-image");
 
 // Populates page with data
-wessexsaxonics.mediaserver.edit.setPageData = function(name, image, width, height){
+wessexsaxonics.mediaserver.edit.setPageData = function(name, image, width, height, auto, rotatedDegrees, flipv, fliph){
 
     // Set title
     editTitle.innerHTML = "Editing " + name;
 
     // Set imageId element
     imageId.value = name;
+
+    // Set auto fix checkbox
+    autoFix.checked = auto;
+
+    // Set scale factor value to default
+    scaleFactor.value = 0;
+
+    // Set degrees rotated value
+    degreesToRotate.setAttribute("value", Number(rotatedDegrees));
+
+    // Set vertical and horizontal flip checkboxes
+    flipVertically.checked = flipv;
+    flipHorizontally.checked = fliph;
 
     // Delete link onclick event
     deleteLink.onclick = function() {

@@ -111,6 +111,23 @@ paths:
           description: New image height value
           type: integer
           format: int64
+        - name: auto
+          in: query
+          description: Automatically adjust image
+          type: boolean
+        - name: degreesToRotate
+          in: query
+          description: Number of degrees by which to rotate the image
+          type: integer
+          format: int64
+        - name: flipv
+          in: query
+          description: Flip image vertically
+          type: boolean
+        - name: fliph
+          in: query
+          description: Flip image horizontally
+          type: boolean
       tags:
       - Image
       responses:

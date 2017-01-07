@@ -4,6 +4,7 @@ import base64
 import crud
 import endpoints
 import google.auth.transport.requests as requests
+import imageManipulation
 import imghdr
 import models
 import re
@@ -19,6 +20,10 @@ class Image(messages.Message):
     image = messages.StringField(2, required=True)
     height = messages.IntegerField(3)
     width = messages.IntegerField(4)
+    auto = messages.BooleanField(5)
+    degreesToRotate = messages.IntegerField(6)
+    flipv = messages.BooleanField(7)
+    fliph = messages.BooleanField(8)
 
 
 class ImageCollection(messages.Message):
@@ -29,6 +34,10 @@ class EditMessage(messages.Message):
     scale_factor = messages.IntegerField(1)
     height = messages.IntegerField(2)
     width = messages.IntegerField(3)
+    auto = messages.BooleanField(4)
+    degreesToRotate = messages.IntegerField(5)
+    flipv = messages.BooleanField(6)
+    fliph = messages.BooleanField(7)
 
 
 WEB_CLIENT_ID = '552722976411-cdl5bddfvaf0fh9djhvetr47j59prgp8.apps.googleusercontent.com'
@@ -71,19 +80,22 @@ class WessexSaxonicsApi(remote.Service):
 
             # Append all images to a return ImageCollection
             ret_images = ImageCollection()
-            for image in images:
+            for image_metadata in images:
 
                 # Retrieve image
-                image_file = crud.retrieve_image_file(user_id + "/" + image.name)
+                image_file = crud.retrieve_image_file(user_id + "/" + image_metadata.name)
+
+                # Perform appropriate transformations on image
+                image_file = imageManipulation.transform(image_metadata, image_file)
 
                 # Encode image
-                base64_prefix = "data:" + image.mime_type + ";base64,"
+                base64_prefix = "data:" + image_metadata.mime_type + ";base64,"
                 encoded_image = base64_prefix + base64.b64encode(image_file)
 
-                ret_images.items.append(Image(name=image.name,
+                ret_images.items.append(Image(name=image_metadata.name,
                                                 image=encoded_image,
-                                                height=image.height,
-                                                width=image.width))
+                                                height=image_metadata.height,
+                                                width=image_metadata.width))
 
             return ret_images
 
@@ -118,21 +130,28 @@ class WessexSaxonicsApi(remote.Service):
 
             try:
                 # Retrieve image metadata
-                image = models.Image.get_image_by_user(request.image_id, user_id)
+                image_metadata = models.Image.get_image_by_user(request.image_id, user_id)
 
-                if image:
+                if image_metadata:
 
                     # Retrieve image
                     image_file = crud.retrieve_image_file(user_id + "/" + request.image_id)
 
+                    # Perform appropriate transformations on image
+                    image_file = imageManipulation.transform(image_metadata, image_file)
+
                     # Encode image
-                    base64_prefix = "data:" + image.mime_type + ";base64,"
+                    base64_prefix = "data:" + image_metadata.mime_type + ";base64,"
                     encoded_image = base64_prefix + base64.b64encode(image_file)
 
-                    return Image(name=image.name,
+                    return Image(name=image_metadata.name,
                                  image=encoded_image,
-                                 height=image.height,
-                                 width=image.width)
+                                 height=image_metadata.height,
+                                 width=image_metadata.width,
+                                 auto=image_metadata.auto,
+                                 degreesToRotate=image_metadata.rotatedDegrees,
+                                 flipv=image_metadata.flip_vertical,
+                                 fliph=image_metadata.flip_horizontal)
                 else:
                     raise endpoints.NotFoundException(
                     'Image ID {} not found'.format(request.image_id))
@@ -222,16 +241,22 @@ class WessexSaxonicsApi(remote.Service):
         if user_id:
 
             try:
-                image = models.Image.get_image_by_user(request.image_id, user_id)
+                image_metadata = models.Image.get_image_by_user(request.image_id, user_id)
 
                 # No case statements Python? Seriously?
                 if (request.scale_factor and request.height) or (request.scale_factor and request.width):
                      raise endpoints.BadRequestException(
                         'Please provide image height and width OR scale factor, not both.')
 
-                if request.scale_factor is None and request.height is None and request.width is None:
+                if (request.scale_factor is None
+                and request.height is None
+                and request.width is None
+                and request.auto is None
+                and request.degreesToRotate is None
+                and request.flipv is None
+                and request.fliph is None):
                     raise endpoints.BadRequestException(
-                       'Please provide image height, width or scale factor.')
+                       'Please provide a property to amend.')
 
                 if request.scale_factor:
 
@@ -241,28 +266,47 @@ class WessexSaxonicsApi(remote.Service):
                     sf /= 100
 
                     # Set new image size
-                    image.width = int(round(image.width * sf))
-                    image.height = int(round(image.height * sf))
+                    image_metadata.width = int(round(image_metadata.width * sf))
+                    image_metadata.height = int(round(image_metadata.height * sf))
 
                 if request.height:
-                    image.height = request.height
+                    image_metadata.height = request.height
 
                 if request.width:
-                    image.width = request.width
+                    image_metadata.width = request.width
 
-                image.put()
+                if request.auto != None:
+                    image_metadata.auto = request.auto
+
+                if request.degreesToRotate != None:
+                    image_metadata.rotatedDegrees = request.degreesToRotate
+
+                if request.flipv != None:
+                    image_metadata.flip_vertical = request.flipv
+
+                if request.fliph != None:
+                    image_metadata.flip_horizontal = request.fliph
+
+                image_metadata.put()
 
                 # Retrieve image
-                image_file = crud.retrieve_image_file(request.image_id)
+                image_file = crud.retrieve_image_file(user_id + "/" + request.image_id)
+
+                # Perform appropriate transformations on image
+                image_file = imageManipulation.transform(image_metadata, image_file)
 
                 # Encode image
-                base64_prefix = "data:" + image.mime_type + "base64,"
+                base64_prefix = "data:" + image_metadata.mime_type + ";base64,"
                 encoded_image = base64_prefix + base64.b64encode(image_file)
 
-                return Image(name=image.name,
+                return Image(name=image_metadata.name,
                              image=encoded_image,
-                             height=image.height,
-                             width=image.width)
+                             height=image_metadata.height,
+                             width=image_metadata.width,
+                             auto=image_metadata.auto,
+                             degreesToRotate=image_metadata.rotatedDegrees,
+                             flipv=image_metadata.flip_vertical,
+                             fliph=image_metadata.flip_horizontal)
 
             except (IndexError, TypeError):
                 raise endpoints.NotFoundException(

@@ -1,5 +1,4 @@
-import crud
-from google.appengine.ext import blobstore, ndb
+from google.appengine.ext import ndb
 from google.appengine.api import images
 
 
@@ -9,41 +8,10 @@ class Image(ndb.Model):
     mime_type = ndb.StringProperty()
     height = ndb.IntegerProperty()
     width = ndb.IntegerProperty()
-
-    # Retrieve public URL for image
-    @property
-    def public_url(self):
-
-        if self.name is None:
-            return None
-
-        else:
-
-            # Build blobstore type filename
-            blobstore_filename = '/gs/' + crud.retrieve_default_bucket() + '/' + self.name
-
-            # Get blobstore key
-            key = blobstore.create_gs_key(blobstore_filename)
-
-            # Return scaled image serving URL
-            return images.get_serving_url(key)
-
-    @property
-    def thumbnail(self):
-
-        if self.name is None:
-            return None
-
-        else:
-
-            # Build blobstore type filename
-            blobstore_filename = '/gs/' + crud.retrieve_default_bucket() + '/' + self.name
-
-            # Get blobstore key
-            key = blobstore.create_gs_key(blobstore_filename)
-
-            # Return scaled image serving URL
-            return images.get_serving_url(key, size=128)
+    auto = ndb.BooleanProperty()
+    rotatedDegrees = ndb.IntegerProperty()
+    flip_vertical = ndb.BooleanProperty()
+    flip_horizontal = ndb.BooleanProperty()
 
     @classmethod
     def get_all_by_user(cls, user_id):
