@@ -6,6 +6,7 @@ import endpoints
 import google.auth.transport.requests as requests
 import imageManipulation
 import imghdr
+import json
 import models
 import re
 import tokenHandler
@@ -20,10 +21,11 @@ class Image(messages.Message):
     image = messages.StringField(2, required=True)
     height = messages.IntegerField(3)
     width = messages.IntegerField(4)
-    auto = messages.BooleanField(5)
-    degreesToRotate = messages.IntegerField(6)
-    flipv = messages.BooleanField(7)
-    fliph = messages.BooleanField(8)
+    metadata = messages.StringField(5)
+    auto = messages.BooleanField(6)
+    degreesToRotate = messages.IntegerField(7)
+    flipv = messages.BooleanField(8)
+    fliph = messages.BooleanField(9)
 
 
 class ImageCollection(messages.Message):
@@ -148,6 +150,7 @@ class WessexSaxonicsApi(remote.Service):
                                  image=encoded_image,
                                  height=image_metadata.height,
                                  width=image_metadata.width,
+                                 metadata = json.dumps(image_metadata.metadata),
                                  auto=image_metadata.auto,
                                  degreesToRotate=image_metadata.rotatedDegrees,
                                  flipv=image_metadata.flip_vertical,
@@ -194,18 +197,20 @@ class WessexSaxonicsApi(remote.Service):
                 request_data = request.image.split(',')
                 mime_type = re.split('[:;]+', request_data[0])[1]
 
+                # Decode base64 image
+                image_file = request_data[1].decode('base64')
+
                 image = models.Image(name=request.name,
                                     user_id=user_id,
                                     mime_type=mime_type,
                                     height=request.height,
-                                    width=request.width)
+                                    width=request.width,
+                                    metadata=imageManipulation.get_metadata(image_file))
                 image.put()
-
-                # Decode base64 image
-                image_file = request_data[1].decode('base64')
 
                 # Upload image to cloud storage
                 crud.upload_image_file(image_file, user_id + "/" + request.name, mime_type)
+
                 return message_types.VoidMessage()
 
             else:
@@ -303,6 +308,7 @@ class WessexSaxonicsApi(remote.Service):
                              image=encoded_image,
                              height=image_metadata.height,
                              width=image_metadata.width,
+                             metadata=image_metadata.metadata,
                              auto=image_metadata.auto,
                              degreesToRotate=image_metadata.rotatedDegrees,
                              flipv=image_metadata.flip_vertical,

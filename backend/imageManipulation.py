@@ -24,3 +24,13 @@ def transform(image_metadata, image):
         image = images.resize(image, height=image_metadata.height)
 
     return image
+
+
+def get_metadata(image):
+
+    image = images.Image(image)
+    image.rotate(0)
+    image.execute_transforms(parse_source_metadata=True)
+    image_metadata = image.get_original_metadata()
+
+    return image_metadata

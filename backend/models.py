@@ -8,6 +8,7 @@ class Image(ndb.Model):
     mime_type = ndb.StringProperty()
     height = ndb.IntegerProperty()
     width = ndb.IntegerProperty()
+    metadata = ndb.JsonProperty()
     auto = ndb.BooleanProperty()
     rotatedDegrees = ndb.IntegerProperty()
     flip_vertical = ndb.BooleanProperty()
