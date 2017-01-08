@@ -724,7 +724,7 @@ var flipHorizontally = document.getElementById('flip-horizontally');
 editForm.onsubmit = function(){
 
     // Submit API call passing image ID and scale factor
-    wessexsaxonics.mediaserver.api.editImage(imageId.value, scaleFactor.value, autoFix.checked, degreesToRotate.value, flipVertically.checked, flipHorizontally.checked, retJson);
+    wessexsaxonics.mediaserver.api.editImage(imageId.value, scaleFactor.value, autoFix.checked, degreesToRotate.value, flipVertically.checked, flipHorizontally.checked);
 
     // Clear page
     wessexsaxonics.mediaserver.edit.clearPageData();
