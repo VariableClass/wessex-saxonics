@@ -77,12 +77,12 @@ def _get_certificate_from_auth_server(key_id):
 
     # Fetch authentication certificates
     response = urlfetch.fetch('https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com')
-    if response.status != 200:
+    if response.status_code != 200:
         raise exceptions.TransportError(
             'Could not fetch certificates at {}'.format(certs_url))
 
     # Parse response
-    certs =  json.loads(response.data.decode('utf-8'))
+    certs =  json.loads(response.content.decode('utf-8'))
 
     # Retrieve appropriate certificate
     cert = certs.get(key_id)

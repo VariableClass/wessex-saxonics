@@ -224,9 +224,9 @@ class WessexSaxonicsApi(remote.Service):
                                     height=request.height,
                                     width=request.width,
                                     auto=False,
-                                    degreesToRotate=0,
-                                    flipv=False,
-                                    fliph=False)
+                                    rotatedDegrees=0,
+                                    flip_vertical=False,
+                                    flip_horizontal=False)
 
                 image.put()
 
@@ -303,8 +303,7 @@ class WessexSaxonicsApi(remote.Service):
             and request.auto is None
             and request.degreesToRotate is None
             and request.flipv is None
-            and request.fliph is None
-            and request.metadata is None):
+            and request.fliph is None):
                 raise endpoints.BadRequestException(
                    'Please provide a property to amend.')
 

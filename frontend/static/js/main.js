@@ -5,6 +5,9 @@
 
 /** Main */
 
+// Base REST API request URL
+const BASE_URL = "https://backend-dot-wessex-saxonics.appspot.com/_ah/api/wessexsaxonics/v1/";
+
 // Namespaces for Wessex-Saxonics and the media server POC.
 var wessexsaxonics = wessexsaxonics || {};
 wessexsaxonics.mediaserver = wessexsaxonics.mediaserver || {};
@@ -101,6 +104,9 @@ wessexsaxonics.mediaserver.navigation.displayPage = function(page){
 
 /** Authentication */
 
+// Backend API key
+var API_KEY = "AIzaSyCFecc5GJRVIABKtLMmCY8K-fCiamBCF2k";
+
 // User name nav item
 var userNav = document.getElementById('user');
 
@@ -176,7 +182,7 @@ wessexsaxonics.mediaserver.api.getImage = function(image_id) {
         var xhr = new XMLHttpRequest();
 
         // Open new GET request
-        xhr.open('GET', 'https://backend-dot-wessex-saxonics.appspot.com/_ah/api/wessexsaxonics/v1/images/' + image_id);
+        xhr.open('GET', BASE_URL + 'images/' + image_id + "?key=" + API_KEY);
 
         // Set authorisation header using Firebase token
         xhr.setRequestHeader('Authorization', 'Bearer ' + idToken);
@@ -202,7 +208,7 @@ wessexsaxonics.mediaserver.api.getImage = function(image_id) {
                     resp = JSON.parse(xhr.responseText);
 
                     // Set Edit page data
-                    wessexsaxonics.mediaserver.edit.setPageData(resp.name, resp.image, resp.width, resp.height, resp.metadata, resp.auto, resp.rotatedDegrees, resp.flipv, resp.fliph);
+                    wessexsaxonics.mediaserver.edit.setPageData(resp.name, resp.image, resp.width, resp.height, resp.metadata, resp.auto, resp.degreesToRotate, resp.flipv, resp.fliph);
 
                     // Select Edit nav item
                     wessexsaxonics.mediaserver.navigation.selectNavItem(editNav);
@@ -234,7 +240,7 @@ wessexsaxonics.mediaserver.api.listImages = function() {
         var xhr = new XMLHttpRequest();
 
         // Open new GET request
-        xhr.open('GET', 'https://backend-dot-wessex-saxonics.appspot.com/_ah/api/wessexsaxonics/v1/images');
+        xhr.open('GET', BASE_URL + "images?key=" + API_KEY);
 
         // Set authorisation header using Firebase token
         xhr.setRequestHeader('Authorization', 'Bearer ' + idToken);
@@ -299,7 +305,7 @@ wessexsaxonics.mediaserver.api.uploadImage = function(id, image, width, height) 
         var xhr = new XMLHttpRequest();
 
         // Open new POST request
-        xhr.open('POST', 'https://backend-dot-wessex-saxonics.appspot.com/_ah/api/wessexsaxonics/v1/images');
+        xhr.open('POST', BASE_URL + "images?key=" + API_KEY);
 
         // Set authorisation header using Firebase token
         xhr.setRequestHeader('Authorization', 'Bearer ' + idToken);
@@ -327,9 +333,6 @@ wessexsaxonics.mediaserver.api.uploadImage = function(id, image, width, height) 
                     // Load main page
                     wessexsaxonics.mediaserver.view.loadPage();
                 }
-
-                // Terminate UI wait state
-                wessexsaxonics.mediaserver.endWait();
             }
         };
 
@@ -359,7 +362,7 @@ wessexsaxonics.mediaserver.api.editImage = function(image_id, scaleFactor, auto,
         var xhr = new XMLHttpRequest();
 
         // Open new POST request
-        xhr.open('POST', 'https://backend-dot-wessex-saxonics.appspot.com/_ah/api/wessexsaxonics/v1/images/' + image_id);
+        xhr.open('POST', BASE_URL + 'images/' + image_id + "?key=" + API_KEY);
 
         // Set authorisation header using Firebase token
         xhr.setRequestHeader('Authorization', 'Bearer ' + idToken);
@@ -385,7 +388,7 @@ wessexsaxonics.mediaserver.api.editImage = function(image_id, scaleFactor, auto,
                     resp = JSON.parse(xhr.responseText);
 
                     // Set Edit page data
-                    wessexsaxonics.mediaserver.edit.setPageData(resp.name, resp.image, resp.width, resp.height, resp.metadata, resp.auto, resp.rotatedDegrees, resp.flipv, resp.fliph);
+                    wessexsaxonics.mediaserver.edit.setPageData(resp.name, resp.image, resp.width, resp.height, resp.metadata, resp.auto, resp.degreesToRotate, resp.flipv, resp.fliph);
 
                     // Select Edit nav item
                     wessexsaxonics.mediaserver.navigation.selectNavItem(editNav);
@@ -417,7 +420,7 @@ wessexsaxonics.mediaserver.api.deleteImage = function(image_id) {
         var xhr = new XMLHttpRequest();
 
         // Open new DELETE request
-        xhr.open('DELETE', 'https://backend-dot-wessex-saxonics.appspot.com/_ah/api/wessexsaxonics/v1/images/' + image_id);
+        xhr.open('DELETE', BASE_URL + 'images/' + image_id + "?key=" + API_KEY);
 
         // Set authorisation header using Firebase token
         xhr.setRequestHeader('Authorization', 'Bearer ' + idToken);
@@ -464,9 +467,6 @@ var viewPage = document.getElementById('view-page');
 
 // Fetches page data, then loads
 wessexsaxonics.mediaserver.view.loadPage = function(){
-
-    // Terminate any wait state
-    wessexsaxonics.mediaserver.endWait();
 
     // Clear all currently displayed images
     wessexsaxonics.mediaserver.view.clearPageData()
@@ -755,7 +755,7 @@ wessexsaxonics.mediaserver.edit.setPageData = function(name, image, width, heigh
     metadataDiv.appendChild(wessexsaxonics.mediaserver.edit.generateMetadataFields(metadata));
 
     // Set degrees rotated value
-    degreesToRotate.setAttribute("value", Number(rotatedDegrees));
+    degreesToRotate.value = Number(rotatedDegrees);
 
     // Set vertical and horizontal flip checkboxes
     flipVertically.checked = flipv;
