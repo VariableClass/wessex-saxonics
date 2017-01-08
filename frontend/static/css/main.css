@@ -75,6 +75,10 @@ body {
     color: #ff0000;
 }
 
+#edit-form input {
+    margin-right: 30px;
+}
+
 #metadata {
     width: 40%;
     position: relative;

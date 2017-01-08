@@ -27,6 +27,7 @@
 
               firebase.auth.GoogleAuthProvider.PROVIDER_ID,
               firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+              firebase.auth.TwitterAuthProvider.PROVIDER_ID,
               firebase.auth.EmailAuthProvider.PROVIDER_ID
             ],
 
@@ -101,9 +102,8 @@
                             <label for="auto-fix">Auto Fix: </label>
                             <input name="auto-fix" id="auto-fix" type="checkbox"/>
 
-                            <label for="scale-factor">Scale by: </label>
+                            <label for="scale-factor">Scale by (%): </label>
                             <input name="scale-factor" id="scale-factor" type="number" min="0" style="text-align: right; width: 75px;"/>
-                            %
 
                             <label for="degrees-to-rotate">Rotate By: </label>
                             <input name="degrees-to-rotate" id="degrees-to-rotate" type="number" step="90" min="0" max="270" style="text-align: right; width: 75px;"/>

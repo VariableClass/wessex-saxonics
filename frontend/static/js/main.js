@@ -749,7 +749,7 @@ wessexsaxonics.mediaserver.edit.setPageData = function(name, image, width, heigh
     autoFix.checked = auto;
 
     // Set scale factor value to default
-    scaleFactor.value = 0;
+    scaleFactor.value = 100;
 
     // Populate metadata with appropriate fields
     metadataDiv.appendChild(wessexsaxonics.mediaserver.edit.generateMetadataFields(metadata));

@@ -219,11 +219,17 @@ class WessexSaxonicsApi(remote.Service):
                 request_data = request.image.split(',')
                 mime_type = re.split('[:;]+', request_data[0])[1]
 
+                # Write image metadata to datastore, initialising adjustment values
                 image = models.Image(parent=user.key,
                                     name=request.name,
                                     mime_type=mime_type,
                                     height=request.height,
-                                    width=request.width)
+                                    width=request.width,
+                                    auto=False,
+                                    degreesToRotate=0,
+                                    flipv=False,
+                                    fliph=False)
+
                 image.put()
 
                 # Decode base64 image
