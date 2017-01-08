@@ -28,9 +28,7 @@ def transform(image_metadata, image):
 
 def get_metadata(image):
 
-    image = images.Image(image)
+    image = images.Image(image_data=image)
     image.rotate(0)
     image.execute_transforms(parse_source_metadata=True)
-    image_metadata = image.get_original_metadata()
-
-    return image_metadata
+    return image.get_original_metadata()

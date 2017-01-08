@@ -716,7 +716,7 @@ var flipHorizontally = document.getElementById('flip-horizontally');
 editForm.onsubmit = function(){
 
     // Submit API call passing image ID and scale factor
-    wessexsaxonics.mediaserver.api.editImage(imageId.value, scaleFactor.value, autoFix.checked, degreesToRotate.value, flipVertically.checked, flipHorizontally.checked);
+    wessexsaxonics.mediaserver.api.editImage(imageId.value, scaleFactor.value, autoFix.checked, degreesToRotate.value, flipVertically.checked, flipHorizontally.checked, retJson);
 
     // Clear page
     wessexsaxonics.mediaserver.edit.clearPageData();
@@ -775,6 +775,13 @@ wessexsaxonics.mediaserver.edit.clearPageData = function() {
     // Clear imageId element
     imageId.value = "";
 
+    // If items have been loaded
+    if (metadataDiv.childNodes.length > 1){
+
+        // Remove metadata items div
+        metadataDiv.removeChild(metadataDiv.lastChild);
+    }
+
     // Clear form
     editForm.reset();
 
@@ -788,11 +795,12 @@ wessexsaxonics.mediaserver.edit.clearPageData = function() {
     html_image.height = 0;
 }
 
+
 // Returns a div containing metadata editing fields
 wessexsaxonics.mediaserver.edit.generateMetadataFields = function(metadata) {
 
     // Retrieve JSON object from string
-    metadataJson = JSON.parse(metadata);
+    var metadataJson = JSON.parse(metadata);
 
     // Create a div to append edit fields to
     var div = document.createElement('div');
@@ -803,33 +811,32 @@ wessexsaxonics.mediaserver.edit.generateMetadataFields = function(metadata) {
         // Get JSON key
         key = Object.keys(metadataJson)[i];
 
-        // Create an edit field
-        div.appendChild(wessexsaxonics.mediaserver.edit.buildEditField(key, metadataJson[key]));
+        // Create a metadata item
+        div.appendChild(wessexsaxonics.mediaserver.edit.buildMetadataItem(key, metadataJson[key]));
     }
 
     return div;
 }
 
-wessexsaxonics.mediaserver.edit.buildEditField = function(key, value){
+wessexsaxonics.mediaserver.edit.buildMetadataItem = function(key, value){
 
-    // Create div to hold label and input field
-    var inputDiv = document.createElement('div');
+    // Create div to hold label and metadata
+    var metadataItem = document.createElement('div');
 
-    // Create label to identify input field
-    var label = document.createElement('label');
-    label.for = key;
+    // Create label to identify metadata item
+    var label = document.createElement('small');
     label.innerHTML = key + ":";
+    label.className = "label";
 
-    // Create input field to display current value/receive new value
-    var input = document.createElement('input');
-    input.type = "text";
-    input.id = key;
-    input.name = key;
-    input.value = value;
+    // Create metadata value item
+    var metadataValue = document.createElement('small');
+    metadataValue.id = key;
+    metadataValue.className = "value";
+    metadataValue.innerHTML = "<b>" + value + "</b>";
 
-    // Append label and input field to div
-    inputDiv.appendChild(label);
-    inputDiv.appendChild(input);
+    // Append label and value to div
+    metadataItem.appendChild(label);
+    metadataItem.appendChild(metadataValue);
 
-    return inputDiv;
+    return metadataItem;
 }

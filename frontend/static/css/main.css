@@ -74,3 +74,36 @@ body {
     display: none;
     color: #ff0000;
 }
+
+#metadata {
+    width: 40%;
+    position: relative;
+}
+
+#metadata div {
+    float: left;
+    width: 100%;
+}
+
+#metadata div .label {
+    float: left;
+    width: 30%;
+}
+
+#metadata div .value {
+    float: right;
+    width: 60%;
+}
+
+#edit-submit {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+#delete-image {
+    float: right;
+    position: absolute;
+    top: 75px;
+    right: 10px;
+    font-size: 16px;
+}

@@ -41,7 +41,6 @@ class EditMessage(messages.Message):
     flipv = messages.BooleanField(6)
     fliph = messages.BooleanField(7)
 
-
 WEB_CLIENT_ID = '552722976411-cdl5bddfvaf0fh9djhvetr47j59prgp8.apps.googleusercontent.com'
 ALLOWED_CLIENT_IDS = [
     WEB_CLIENT_ID,
@@ -58,7 +57,6 @@ class WessexSaxonicsApi(remote.Service):
     GET_ALL_IMAGES_RESOURCE = endpoints.ResourceContainer(
         message_types.VoidMessage,
     )
-
 
     @endpoints.method(
         GET_ALL_IMAGES_RESOURCE,
@@ -134,34 +132,32 @@ class WessexSaxonicsApi(remote.Service):
                 # Retrieve image metadata
                 image_metadata = models.Image.get_image_by_user(request.image_id, user_id)
 
-                if image_metadata:
-
-                    # Retrieve image
-                    image_file = crud.retrieve_image_file(user_id + "/" + request.image_id)
-
-                    # Perform appropriate transformations on image
-                    image_file = imageManipulation.transform(image_metadata, image_file)
-
-                    # Encode image
-                    base64_prefix = "data:" + image_metadata.mime_type + ";base64,"
-                    encoded_image = base64_prefix + base64.b64encode(image_file)
-
-                    return Image(name=image_metadata.name,
-                                 image=encoded_image,
-                                 height=image_metadata.height,
-                                 width=image_metadata.width,
-                                 metadata = json.dumps(image_metadata.metadata),
-                                 auto=image_metadata.auto,
-                                 degreesToRotate=image_metadata.rotatedDegrees,
-                                 flipv=image_metadata.flip_vertical,
-                                 fliph=image_metadata.flip_horizontal)
-                else:
-                    raise endpoints.NotFoundException(
-                    'Image ID {} not found'.format(request.image_id))
-
             except (IndexError, TypeError):
                 raise endpoints.NotFoundException(
                     'Image ID {} not found'.format(request.image_id))
+
+            # Retrieve image
+            image_file = crud.retrieve_image_file(user_id + "/" + request.image_id)
+
+            # Retrieve metadata
+            metadata = imageManipulation.get_metadata(image_file)
+
+            # Perform appropriate transformations on image
+            image_file = imageManipulation.transform(image_metadata, image_file)
+
+            # Encode image to return
+            base64_prefix = "data:" + image_metadata.mime_type + ";base64,"
+            encoded_image = base64_prefix + base64.b64encode(image_file)
+
+            return Image(name=image_metadata.name,
+                         image=encoded_image,
+                         height=image_metadata.height,
+                         width=image_metadata.width,
+                         metadata=json.dumps(metadata),
+                         auto=image_metadata.auto,
+                         degreesToRotate=image_metadata.rotatedDegrees,
+                         flipv=image_metadata.flip_vertical,
+                         fliph=image_metadata.flip_horizontal)
 
         # If user is not logged in
         else:
@@ -197,16 +193,15 @@ class WessexSaxonicsApi(remote.Service):
                 request_data = request.image.split(',')
                 mime_type = re.split('[:;]+', request_data[0])[1]
 
-                # Decode base64 image
-                image_file = request_data[1].decode('base64')
-
                 image = models.Image(name=request.name,
                                     user_id=user_id,
                                     mime_type=mime_type,
                                     height=request.height,
-                                    width=request.width,
-                                    metadata=imageManipulation.get_metadata(image_file))
+                                    width=request.width)
                 image.put()
+
+                # Decode base64 image
+                image_file = request_data[1].decode('base64')
 
                 # Upload image to cloud storage
                 crud.upload_image_file(image_file, user_id + "/" + request.name, mime_type)
@@ -246,77 +241,85 @@ class WessexSaxonicsApi(remote.Service):
         if user_id:
 
             try:
+
+                # Retrieve image metadata
                 image_metadata = models.Image.get_image_by_user(request.image_id, user_id)
-
-                # No case statements Python? Seriously?
-                if (request.scale_factor and request.height) or (request.scale_factor and request.width):
-                     raise endpoints.BadRequestException(
-                        'Please provide image height and width OR scale factor, not both.')
-
-                if (request.scale_factor is None
-                and request.height is None
-                and request.width is None
-                and request.auto is None
-                and request.degreesToRotate is None
-                and request.flipv is None
-                and request.fliph is None):
-                    raise endpoints.BadRequestException(
-                       'Please provide a property to amend.')
-
-                if request.scale_factor:
-
-                    sf = float(request.scale_factor)
-
-                    # Write new values to image
-                    sf /= 100
-
-                    # Set new image size
-                    image_metadata.width = int(round(image_metadata.width * sf))
-                    image_metadata.height = int(round(image_metadata.height * sf))
-
-                if request.height:
-                    image_metadata.height = request.height
-
-                if request.width:
-                    image_metadata.width = request.width
-
-                if request.auto != None:
-                    image_metadata.auto = request.auto
-
-                if request.degreesToRotate != None:
-                    image_metadata.rotatedDegrees = request.degreesToRotate
-
-                if request.flipv != None:
-                    image_metadata.flip_vertical = request.flipv
-
-                if request.fliph != None:
-                    image_metadata.flip_horizontal = request.fliph
-
-                image_metadata.put()
 
                 # Retrieve image
                 image_file = crud.retrieve_image_file(user_id + "/" + request.image_id)
 
-                # Perform appropriate transformations on image
-                image_file = imageManipulation.transform(image_metadata, image_file)
-
-                # Encode image
-                base64_prefix = "data:" + image_metadata.mime_type + ";base64,"
-                encoded_image = base64_prefix + base64.b64encode(image_file)
-
-                return Image(name=image_metadata.name,
-                             image=encoded_image,
-                             height=image_metadata.height,
-                             width=image_metadata.width,
-                             metadata=image_metadata.metadata,
-                             auto=image_metadata.auto,
-                             degreesToRotate=image_metadata.rotatedDegrees,
-                             flipv=image_metadata.flip_vertical,
-                             fliph=image_metadata.flip_horizontal)
-
-            except (IndexError, TypeError):
+            except (IndexError):
                 raise endpoints.NotFoundException(
                     'Image ID {} not found'.format(request.image_id))
+
+
+            # No case statements Python? Seriously?
+            if (request.scale_factor and request.height) or (request.scale_factor and request.width):
+                 raise endpoints.BadRequestException(
+                    'Please provide image height and width OR scale factor, not both.')
+
+            if (request.scale_factor is None
+            and request.height is None
+            and request.width is None
+            and request.auto is None
+            and request.degreesToRotate is None
+            and request.flipv is None
+            and request.fliph is None
+            and request.metadata is None):
+                raise endpoints.BadRequestException(
+                   'Please provide a property to amend.')
+
+            if request.scale_factor:
+
+                sf = float(request.scale_factor)
+
+                # Write new values to image
+                sf /= 100
+
+                # Set new image size
+                image_metadata.width = int(round(image_metadata.width * sf))
+                image_metadata.height = int(round(image_metadata.height * sf))
+
+            if request.height:
+                image_metadata.height = request.height
+
+            if request.width:
+                image_metadata.width = request.width
+
+            if request.auto != None:
+                image_metadata.auto = request.auto
+
+            if request.degreesToRotate != None:
+                image_metadata.rotatedDegrees = request.degreesToRotate
+
+            if request.flipv != None:
+                image_metadata.flip_vertical = request.flipv
+
+            if request.fliph != None:
+                image_metadata.flip_horizontal = request.fliph
+
+            image_metadata.put()
+
+
+            # Retrieve metadata
+            metadata = imageManipulation.get_metadata(image_file)
+
+            # Perform appropriate transformations on image
+            image_file = imageManipulation.transform(image_metadata, image_file)
+
+            # Encode image to return
+            base64_prefix = "data:" + image_metadata.mime_type + ";base64,"
+            encoded_image = base64_prefix + base64.b64encode(image_file)
+
+            return Image(name=image_metadata.name,
+                         image=encoded_image,
+                         height=image_metadata.height,
+                         width=image_metadata.width,
+                         metadata=json.dumps(metadata),
+                         auto=image_metadata.auto,
+                         degreesToRotate=image_metadata.rotatedDegrees,
+                         flipv=image_metadata.flip_vertical,
+                         fliph=image_metadata.flip_horizontal)
 
         # If user is not logged in
         else:
