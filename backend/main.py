@@ -66,11 +66,18 @@ class WessexSaxonicsApi(remote.Service):
         name='images.list')
     def list_images(self, request):
 
-        # Retrieve user token
-        id_token = self.request_state.headers.get_all('Authorization')[0].split(' ').pop()
+        try:
+            # Retrieve user token
+            id_token = self.request_state.headers.get_all('Authorization')[0].split(' ').pop()
 
-        # Get user ID from token
-        user_id = tokenHandler.get_user_from_token(id_token)
+            # Get user ID from token
+            user_id = tokenHandler.get_user_from_token(id_token)
+
+        except(IndexError):
+            # Return 401 Unauthorized
+            raise endpoints.UnauthorizedException(
+                'Please provide user credentials')
+
 
         # If user retrieved
         if user_id:
@@ -104,7 +111,7 @@ class WessexSaxonicsApi(remote.Service):
 
             # Return 401 Unauthorized
             raise endpoints.UnauthorizedException(
-                'No credentials found')
+                'Please provide user credentials')
 
 
     GET_IMAGE_RESOURCE = endpoints.ResourceContainer(
@@ -120,11 +127,17 @@ class WessexSaxonicsApi(remote.Service):
         name='image.get')
     def get_image(self, request):
 
-        # Retrieve user token
-        id_token = self.request_state.headers.get_all('Authorization')[0].split(' ').pop()
+        try:
+            # Retrieve user token
+            id_token = self.request_state.headers.get_all('Authorization')[0].split(' ').pop()
 
-        # Get user ID from token
-        user_id = tokenHandler.get_user_from_token(id_token)
+            # Get user ID from token
+            user_id = tokenHandler.get_user_from_token(id_token)
+
+        except(IndexError):
+            # Return 401 Unauthorized
+            raise endpoints.UnauthorizedException(
+                'Please provide user credentials')
 
         if user_id:
 
@@ -175,11 +188,17 @@ class WessexSaxonicsApi(remote.Service):
         name='images.upload')
     def upload_image(self, request):
 
-        # Retrieve user token
-        id_token = self.request_state.headers.get_all('Authorization')[0].split(' ').pop()
+        try:
+            # Retrieve user token
+            id_token = self.request_state.headers.get_all('Authorization')[0].split(' ').pop()
 
-        # Get user ID from token
-        user_id = tokenHandler.get_user_from_token(id_token)
+            # Get user ID from token
+            user_id = tokenHandler.get_user_from_token(id_token)
+
+        except(IndexError):
+            # Return 401 Unauthorized
+            raise endpoints.UnauthorizedException(
+                'Please provide user credentials')
 
         if user_id:
 
@@ -232,11 +251,17 @@ class WessexSaxonicsApi(remote.Service):
         name='image.edit')
     def edit_image(self, request):
 
-        # Retrieve user token
-        id_token = self.request_state.headers.get_all('Authorization')[0].split(' ').pop()
+        try:
+            # Retrieve user token
+            id_token = self.request_state.headers.get_all('Authorization')[0].split(' ').pop()
 
-        # Get user ID from token
-        user_id = tokenHandler.get_user_from_token(id_token)
+            # Get user ID from token
+            user_id = tokenHandler.get_user_from_token(id_token)
+
+        except(IndexError):
+            # Return 401 Unauthorized
+            raise endpoints.UnauthorizedException(
+                'Please provide user credentials')
 
         if user_id:
 
@@ -336,11 +361,17 @@ class WessexSaxonicsApi(remote.Service):
         name='image.delete')
     def delete_image(self, request):
 
-        # Retrieve user token
-        id_token = self.request_state.headers.get_all('Authorization')[0].split(' ').pop()
+        try:
+            # Retrieve user token
+            id_token = self.request_state.headers.get_all('Authorization')[0].split(' ').pop()
 
-        # Get user ID from token
-        user_id = tokenHandler.get_user_from_token(id_token)
+            # Get user ID from token
+            user_id = tokenHandler.get_user_from_token(id_token)
+
+        except(IndexError):
+            # Return 401 Unauthorized
+            raise endpoints.UnauthorizedException(
+                'Please provide user credentials')
 
         if user_id:
 
