@@ -4,7 +4,7 @@ threadsafe: true
 service: backend 
 
 handlers:
-- url: /_ah/spi/.*
+- url: /_ah/api/.*
   script: main.api
   secure: always
 
@@ -13,10 +13,8 @@ libraries:
   version: 2.6
 - name: ssl
   version: latest
-- name: endpoints
-  version: latest
 
 env_variables:
   ENDPOINTS_SERVICE_NAME: backend-dot-wessex-saxonics.appspot.com
-  ENDPOINTS_SERVICE_VERSION: 2017-01-08r5
+  ENDPOINTS_SERVICE_VERSION: 2017-01-08r9
   FIREBASE_PROJECT_ID: 'wessex-saxonics'

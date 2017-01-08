@@ -1,11 +1,11 @@
 import base64
-import google.auth.transport.requests as requests
 import json
 import jwt
 import time
 from binascii import a2b_base64
 from Crypto.Util.asn1 import DerSequence
 from Crypto.PublicKey import RSA
+from google.appengine.api import urlfetch
 from jwt.contrib.algorithms.py_ecdsa import ECAlgorithm
 from jwt.contrib.algorithms.pycrypto import RSAAlgorithm
 from six.moves import http_client
@@ -76,9 +76,8 @@ def _get_key_id_from_token_header(encoded_token):
 def _get_certificate_from_auth_server(key_id):
 
     # Fetch authentication certificates
-    HTTP_REQUEST = requests.Request()
-    response = HTTP_REQUEST('https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com')
-    if response.status != http_client.OK:
+    response = urlfetch.fetch('https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com')
+    if response.status != 200:
         raise exceptions.TransportError(
             'Could not fetch certificates at {}'.format(certs_url))
 

@@ -17,7 +17,7 @@ securityDefinitions:
 
   api_key:
     type: apiKey
-    name: access_token
+    name: key
     in: query
 
   firebase:

@@ -3,14 +3,12 @@
 import base64
 import crud
 import endpoints
-import google.auth.transport.requests as requests
 import imageManipulation
 import imghdr
 import json
 import models
 import re
 import tokenHandler
-from google.auth import exceptions
 from protorpc import message_types, messages, remote
 
 # [END imports]
