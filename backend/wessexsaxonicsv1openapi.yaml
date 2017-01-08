@@ -12,6 +12,25 @@ schemes:
 basePath: /_ah/api/wessexsaxonics/v1
 produces:
   - application/json
+
+securityDefinitions:
+
+  api_key:
+    type: apiKey
+    name: access_token
+    in: query
+
+  firebase:
+    authorizationUrl : "wessex-saxonics.appspot.com"
+    flow: "implicit"
+    type: "oauth2"
+    x-issuer: "https://securetoken.google.com/wessex-saxonics"
+    x-jwks_uri: "https://www.googleapis.com/service_accounts/v1/metadata/x509/securetoken@system.gserviceaccount.com"
+
+security:
+  - firebase: []
+  - api_key: []
+
 paths:
   /images:
     get:
@@ -19,6 +38,8 @@ paths:
       operationId: imagesList
       description: |
         The Images endpoint returns all images stored for a given user. The response includes each image and the corresponding metadata.
+      security:
+          - api_key: []
       tags:
         - Images
       responses:
@@ -50,7 +71,8 @@ paths:
           description: Custom image height.
           type: integer
           format: int64
-
+      security:
+        - api_key: []
       tags:
         - Images
       responses:
@@ -75,6 +97,8 @@ paths:
           description: ID of image to return
           required: true
           type: string
+      security:
+        - api_key: []
       tags:
         - Image
       responses:
@@ -128,8 +152,10 @@ paths:
           in: query
           description: Flip image horizontally
           type: boolean
+      security:
+        - api_key: []
       tags:
-      - Image
+        - Image
       responses:
         200:
           description: A single Image.
@@ -149,6 +175,8 @@ paths:
           description: ID of image to delete.
           required: true
           type: string
+      security:
+        - api_key: []
       tags:
         - Image
       responses:
@@ -159,20 +187,26 @@ paths:
         default:
           description: Unexpected error
 
-securityDefinitions:
-
-  api_key:
-    type: apiKey
-    in: query
-    name: key
-
-  firebase:
-    authorizationUrl : "wessex-saxonics.appspot.com"
-    flow: "implicit"
-    type: "oauth2"
-    x-issuer: "https://securetoken.google.com/wessex-saxonics"
-    x-jwks_uri: "https://www.googleapis.com/service_accounts/v1/metadata/x509/securetoken@system.gserviceaccount.com"
-
-security:
-  - api_key: []
-  - firebase: []
+  /users/{user_id}:
+    get:
+      summary: User
+      operationId: userGet
+      description: |
+        The User endpoint returns a single user, given an ID. The response includes the user ID alone.
+      parameters:
+        - name: user_id
+          in: path
+          description: ID of user to return
+          required: true
+          type: string
+      security:
+        - api_key: []
+      tags:
+        - User
+      responses:
+        200:
+          description: A single User
+        401:
+          description: Unauthorized
+        default:
+          description: Unexpected error

@@ -52,8 +52,6 @@ ALLOWED_CLIENT_IDS = [
                scopes=[endpoints.EMAIL_SCOPE])
 class WessexSaxonicsApi(remote.Service):
 
-    ITEMS_PER_PAGE = 20
-
     GET_ALL_IMAGES_RESOURCE = endpoints.ResourceContainer(
         message_types.VoidMessage,
     )
@@ -82,8 +80,11 @@ class WessexSaxonicsApi(remote.Service):
         # If user retrieved
         if user_id:
 
+            # Create new user if user does not already exist
+            models.User.if_new_create(user_id)
+
             # Retrieve user images' metadata
-            images = models.Image.get_all_by_user(user_id).fetch(self.ITEMS_PER_PAGE)
+            images = models.Image.get_all_by_user(user_id).fetch()
 
             # Append all images to a return ImageCollection
             ret_images = ImageCollection()
@@ -140,6 +141,9 @@ class WessexSaxonicsApi(remote.Service):
                 'Please provide user credentials')
 
         if user_id:
+
+            # Create new user if user does not already exist
+            models.User.if_new_create(user_id)
 
             try:
                 # Retrieve image metadata
@@ -202,6 +206,9 @@ class WessexSaxonicsApi(remote.Service):
 
         if user_id:
 
+            # Create new user if user does not already exist
+            user = models.User.if_new_create(user_id)
+
             if len(request.name) == 0:
                 raise endpoints.BadRequestException(
                     'Please enter a name for the file')
@@ -212,8 +219,8 @@ class WessexSaxonicsApi(remote.Service):
                 request_data = request.image.split(',')
                 mime_type = re.split('[:;]+', request_data[0])[1]
 
-                image = models.Image(name=request.name,
-                                    user_id=user_id,
+                image = models.Image(parent=user.key,
+                                    name=request.name,
                                     mime_type=mime_type,
                                     height=request.height,
                                     width=request.width)
@@ -264,6 +271,9 @@ class WessexSaxonicsApi(remote.Service):
                 'Please provide user credentials')
 
         if user_id:
+
+            # Create new user if user does not already exist
+            models.User.if_new_create(user_id)
 
             try:
 
@@ -374,6 +384,9 @@ class WessexSaxonicsApi(remote.Service):
                 'Please provide user credentials')
 
         if user_id:
+
+            # Create new user if user does not already exist
+            models.User.if_new_create(user_id)
 
             try:
                 # Delete metadata from datastore
