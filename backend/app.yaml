@@ -1,7 +1,7 @@
 runtime: python27
 api_version: 1
 threadsafe: true
-service: backend 
+service: backend
 
 handlers:
 - url: /_ah/api/.*
@@ -16,5 +16,5 @@ libraries:
 
 env_variables:
   ENDPOINTS_SERVICE_NAME: backend-dot-wessex-saxonics.appspot.com
-  ENDPOINTS_SERVICE_VERSION: 2017-01-08r9
+  ENDPOINTS_SERVICE_VERSION: 2017-01-08r10
   FIREBASE_PROJECT_ID: 'wessex-saxonics'

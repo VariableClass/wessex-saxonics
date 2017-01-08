@@ -187,6 +187,102 @@ paths:
         default:
           description: Unexpected error
 
+  /images/{image_id}/getShareURL:
+    get:
+      summary: Share URL for Image
+      operationId: shareURLGet
+      description: |
+        The Image getShareURL endpoint returns a URL and epoch expiry time, given an ID.
+      parameters:
+        - name: image_id
+          in: path
+          description: ID of image to generate share URL for
+          required: true
+          type: string
+      security:
+        - api_key: []
+      tags:
+        - SharedImage
+      responses:
+        200:
+          description: A Share URL and expiry datetime
+        401:
+          description: Unauthorized
+        default:
+          description: Unexpected error
+
+  /shared_images:
+    get:
+      summary: Images shared with user
+      operationId: sharedImagesList
+      description: |
+        The Shared Images endpoint returns all images where the given user is listed as authorised to edit the image. The response includes each image and the corresponding metadata.
+      security:
+          - api_key: []
+      tags:
+        - SharedImage
+      responses:
+        200:
+          description: An array of Images
+        401:
+          description: Unauthorized
+        default:
+          description: Unexpected error
+
+  /shared_images/{image_id}:
+    get:
+      summary: Image shared with user
+      operationId: sharedImageGet
+      description: |
+        The Shared Image endpoint returns a single image where the given user is listed as authorised to edit it, given an ID. The response includes the image and it's corresponding metadata.
+      parameters:
+        - name: image_id
+          in: path
+          description: ID of image to return
+          required: true
+          type: string
+      security:
+        - api_key: []
+      tags:
+        - SharedImage
+      responses:
+        200:
+          description: A single Image
+        401:
+          description: Unauthorized
+        default:
+          description: Unexpected error
+
+  /shared_images/{share_user_id}/{image_id}:
+    get:
+      summary: Confirm image share
+      operationId: confirmShareGet
+      description: |
+        The Confirm Image Share endpoint returns 204 success if the share is still valid and has been successfully confirmed
+      parameters:
+        - name: share_user_id
+          in: path
+          description: ID of sharing user
+          required: true
+          type: string
+        - name: image_id
+          in: path
+          description: ID of image being shared
+          required: true
+          type: string
+        security:
+          - api_key: []
+        tags:
+          - SharedImage
+        responses:
+          204:
+            description: Image share confirmed
+          401:
+            description: Unauthorized
+          default:
+            description: Unexpected error
+
+
   /users/{user_id}:
     get:
       summary: User

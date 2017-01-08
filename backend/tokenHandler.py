@@ -75,6 +75,9 @@ def _get_key_id_from_token_header(encoded_token):
 
 def _get_certificate_from_auth_server(key_id):
 
+    # Extend response wait for slower clients
+    urlfetch.set_default_fetch_deadline(30)
+
     # Fetch authentication certificates
     response = urlfetch.fetch('https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com')
     if response.status_code != 200:

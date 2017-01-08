@@ -27,10 +27,12 @@ class Image(ndb.Model):
     mime_type = ndb.StringProperty()
     height = ndb.IntegerProperty()
     width = ndb.IntegerProperty()
+    authorised_users = ndb.StringProperty(repeated=True)
     auto = ndb.BooleanProperty()
     rotatedDegrees = ndb.IntegerProperty()
     flip_vertical = ndb.BooleanProperty()
     flip_horizontal = ndb.BooleanProperty()
+    share_expiry = ndb.DateTimeProperty()
 
     @classmethod
     def get_all_by_user(cls, user_id):
@@ -45,3 +47,11 @@ class Image(ndb.Model):
     def delete_user_image(cls, name, user_id):
         key = cls.get_image_by_user(name, user_id).key
         key.delete()
+
+    @classmethod
+    def get_all_shared_with_user(cls, user_id):
+        return cls.query(cls.authorised_users == user_id)
+
+    @classmethod
+    def get_shared_image_by_user(cls, name, user_id):
+        return cls.get_all_shared_with_user(user_id).filter(cls.name == name).get()

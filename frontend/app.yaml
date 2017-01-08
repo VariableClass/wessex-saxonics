@@ -4,6 +4,10 @@ threadsafe: true
 service: default
 
 handlers:
+- url: /share/.*
+  static_files: templates/index.html
+  upload: templates/index\.html
+  secure: always
 - url: /css
   static_dir: static/css
 - url: /js

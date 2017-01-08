@@ -14,6 +14,7 @@ wessexsaxonics.mediaserver = wessexsaxonics.mediaserver || {};
 wessexsaxonics.mediaserver.api = wessexsaxonics.mediaserver.api || {};
 wessexsaxonics.mediaserver.edit = wessexsaxonics.mediaserver.edit || {};
 wessexsaxonics.mediaserver.navigation = wessexsaxonics.mediaserver.navigation || {};
+wessexsaxonics.mediaserver.sharedImages = wessexsaxonics.mediaserver.sharedImages || {};
 wessexsaxonics.mediaserver.upload = wessexsaxonics.mediaserver.upload || {};
 wessexsaxonics.mediaserver.view = wessexsaxonics.mediaserver.view || {};
 
@@ -35,14 +36,14 @@ wessexsaxonics.mediaserver.startWait = function(){
 
     loadingScreen.style.display = DISPLAYED;
     loadingText.style.display = DISPLAYED;
-}
+};
 
 // Terminates the application UI wait state
 wessexsaxonics.mediaserver.endWait = function(){
 
     loadingScreen.style.display = HIDDEN;
     loadingText.style.display = HIDDEN;
-}
+};
 
 // Initialises the application
 wessexsaxonics.mediaserver.init = function() {
@@ -52,7 +53,6 @@ wessexsaxonics.mediaserver.init = function() {
 
         // Load View page if so
         wessexsaxonics.mediaserver.view.loadPage();
-
     }
 };
 
@@ -78,7 +78,7 @@ wessexsaxonics.mediaserver.navigation.selectNavItem = function(navItem){
 
     // Select nav item
     navItem.className = ACTIVE;
-}
+};
 
 
 // PAGES
@@ -88,7 +88,8 @@ wessexsaxonics.mediaserver.navigation.hideAllPages = function(){
     viewPage.style.display = HIDDEN;
     uploadPage.style.display = HIDDEN;
     editPage.style.display = HIDDEN;
-}
+    sharedPage.style.display = HIDDEN;
+};
 
 // Displays a single page
 wessexsaxonics.mediaserver.navigation.displayPage = function(page){
@@ -98,7 +99,7 @@ wessexsaxonics.mediaserver.navigation.displayPage = function(page){
 
     // Display selected page
     page.style.display = DISPLAYED;
-}
+};
 
 
 
@@ -124,12 +125,22 @@ signoutNav.onclick = function(){
 
     // Perform signout
     firebase.auth().signOut();
-}
+};
 
 // Firebase authentication change event
 firebase.auth().onAuthStateChanged(function(user) {
 
     if (user) {
+
+        path = window.location.pathname.split("/");
+
+        if (path[1] == "share") {
+
+            shareUserId = path[2];
+            imageId = path[3];
+
+            wessexsaxonics.mediaserver.api.confirmShare(shareUserId, imageId);
+        }
 
         // Hide firebase container
         document.getElementById('firebase').style.display = HIDDEN;
@@ -141,6 +152,7 @@ firebase.auth().onAuthStateChanged(function(user) {
         uploadNav.style.display = DISPLAYED;
         editNav.style.display = DISPLAYED;
         userNav.style.display = DISPLAYED;
+        sharedNav.style.display = DISPLAYED;
         signoutNav.style.display = DISPLAYED;
 
         // Load view page
@@ -158,6 +170,7 @@ firebase.auth().onAuthStateChanged(function(user) {
         uploadNav.style.display = HIDDEN;
         editNav.style.display = HIDDEN;
         userNav.style.display = HIDDEN;
+        sharedNav.style.display = HIDDEN;
         signoutNav.style.display = HIDDEN;
 
         // Hide all pages
@@ -295,7 +308,7 @@ wessexsaxonics.mediaserver.api.uploadImage = function(id, image, width, height) 
     firebase.auth().currentUser.getToken().then(function(idToken){
 
         // Define payload
-        var jsonPayload = new Object();
+      var jsonPayload = {};
         jsonPayload.name = id;
         jsonPayload.image = image;
         jsonPayload.width = width;
@@ -351,12 +364,12 @@ wessexsaxonics.mediaserver.api.editImage = function(image_id, scaleFactor, auto,
     firebase.auth().currentUser.getToken().then(function(idToken){
 
         // Define payload
-        var jsonPayload = new Object();
+      	var jsonPayload = {};
         jsonPayload.scale_factor = Number(scaleFactor);
         jsonPayload.auto = auto;
         jsonPayload.degreesToRotate = Number(degreesToRotate);
         jsonPayload.flipv = flipv;
-        jsonPayload.fliph = fliph
+        jsonPayload.fliph = fliph;
 
         // Create new request
         var xhr = new XMLHttpRequest();
@@ -405,7 +418,7 @@ wessexsaxonics.mediaserver.api.editImage = function(image_id, scaleFactor, auto,
         // Send request with payload
         xhr.send(JSON.stringify(jsonPayload));
     });
-}
+};
 
 // Deletes an image
 wessexsaxonics.mediaserver.api.deleteImage = function(image_id) {
@@ -442,7 +455,218 @@ wessexsaxonics.mediaserver.api.deleteImage = function(image_id) {
         // Send request
         xhr.send();
     });
-}
+};
+
+// Returns the share URL for an image
+wessexsaxonics.mediaserver.api.getShareURL = function(image_id) {
+
+    // Put UI into wait state
+    wessexsaxonics.mediaserver.startWait();
+
+    // Retrieve current user token
+    firebase.auth().currentUser.getToken().then(function(idToken){
+
+        // Create new request
+        var xhr = new XMLHttpRequest();
+
+        // Open new GET request
+        xhr.open('GET', BASE_URL + 'images/' + image_id + "/getShareURL?key=" + API_KEY);
+
+        // Set authorisation header using Firebase token
+        xhr.setRequestHeader('Authorization', 'Bearer ' + idToken);
+
+        // GET request state change callback event
+        xhr.onreadystatechange = function() {
+
+            // If request has completed
+            if (xhr.readyState == XMLHttpRequest.DONE){
+
+                // If request status is 404
+                if (xhr.status == 404){
+
+                    // Alert user of request failure
+                    alert("No image found for ID: " + image_id);
+
+                } else {    // Else if request status not 404
+
+                    // Parse response JSON
+                    resp = JSON.parse(xhr.responseText);
+
+                    // Display share URL to user
+                    prompt("Share the link below with a friend and they'll be able to edit this image. This link will expire at " + resp.expiry, resp.url);
+                }
+
+                // Terminate UI wait state
+                wessexsaxonics.mediaserver.endWait();
+            }
+        };
+
+        // Send request
+        xhr.send();
+    });
+};
+
+// Confirms share
+wessexsaxonics.mediaserver.api.confirmShare = function(share_user_id, image_id){
+
+    // Retrieve current user token
+    firebase.auth().currentUser.getToken().then(function(idToken){
+
+        // Create new request
+        var xhr = new XMLHttpRequest();
+
+        // Open new GET request
+        xhr.open('GET', BASE_URL + 'shared_images/' + share_user_id + "/" + image_id + "?key=" + API_KEY);
+
+        // Set authorisation header using Firebase token
+        xhr.setRequestHeader('Authorization', 'Bearer ' + idToken);
+
+        // GET request state change callback event
+        xhr.onreadystatechange = function() {
+
+            // If request has completed
+            if (xhr.readyState == XMLHttpRequest.DONE){
+
+                // If request status is 204
+                if (xhr.status == 204){
+
+                    // Redirect to main page
+                    window.location = "https://wessex-saxonics.appspot.com";
+
+                    // Load shared images page
+                    wessexsaxonics.mediaserver.sharedImages.loadPage();
+
+                } else {    // Else if request status not 404
+
+                    alert("Failed to confirm share");
+                }
+
+                // Terminate UI wait state
+                wessexsaxonics.mediaserver.endWait();
+            }
+        };
+
+        // Send request
+        xhr.send();
+    });
+};
+
+// Returns an image
+wessexsaxonics.mediaserver.api.getSharedImage = function(image_id) {
+
+    // Put UI into wait state
+    wessexsaxonics.mediaserver.startWait();
+
+    // Retrieve current user token
+    firebase.auth().currentUser.getToken().then(function(idToken){
+
+        // Create new request
+        var xhr = new XMLHttpRequest();
+
+        // Open new GET request
+        xhr.open('GET', BASE_URL + 'shared_images/' + image_id + "?key=" + API_KEY);
+
+        // Set authorisation header using Firebase token
+        xhr.setRequestHeader('Authorization', 'Bearer ' + idToken);
+
+        // GET request state change callback event
+        xhr.onreadystatechange = function() {
+
+            // If request has completed
+            if (xhr.readyState == XMLHttpRequest.DONE){
+
+                // If request status is 404
+                if (xhr.status == 404){
+
+                    // Alert user of request failure
+                    alert("No image found for ID: " + image_id);
+
+                    // Load main page
+                    wessexsaxonics.mediaserver.sharedImages.loadPage();
+
+                } else {    // Else if request status not 404
+
+                    // Parse response JSON
+                    resp = JSON.parse(xhr.responseText);
+
+                    // Set Edit page data
+                    wessexsaxonics.mediaserver.edit.setPageData(resp.name, resp.image, resp.width, resp.height, resp.metadata, resp.auto, resp.degreesToRotate, resp.flipv, resp.fliph);
+
+                    // Select Edit nav item
+                    wessexsaxonics.mediaserver.navigation.selectNavItem(editNav);
+
+                    // Display Edit page
+                    wessexsaxonics.mediaserver.navigation.displayPage(editPage);
+                }
+
+                // Terminate UI wait state
+                wessexsaxonics.mediaserver.endWait();
+            }
+        };
+
+        // Send request
+        xhr.send();
+    });
+};
+
+
+// Lists shared user images
+wessexsaxonics.mediaserver.api.listSharedImages = function() {
+
+    // Put UI into wait state
+    wessexsaxonics.mediaserver.startWait();
+
+    // Retrieve current user token
+    firebase.auth().currentUser.getToken().then(function(idToken){
+
+        // Create new request
+        var xhr = new XMLHttpRequest();
+
+        // Open new GET request
+        xhr.open('GET', BASE_URL + "shared_images?key=" + API_KEY);
+
+        // Set authorisation header using Firebase token
+        xhr.setRequestHeader('Authorization', 'Bearer ' + idToken);
+
+        // GET request state change callback event
+        xhr.onreadystatechange = function() {
+
+            // If request has completed
+            if (xhr.readyState == XMLHttpRequest.DONE){
+
+                // Parse response JSON
+                resp = JSON.parse(xhr.responseText);
+                resp.items = resp.items || [];
+
+                // If items returned
+                if (resp.items.length > 0) {
+
+                    // Iterate through each one and display it
+                    for (var i = 0; i < resp.items.length; i++) {
+
+                        var name = resp.items[i].name;
+                        var image = resp.items[i].image;
+                        var width = resp.items[i].width;
+                        var height = resp.items[i].height;
+
+                        wessexsaxonics.mediaserver.sharedImages.addImageToGrid(name, image, width, height);
+                    }
+
+                } else {    // Else if no items returned
+
+                    // Display no images message
+                    wessexsaxonics.mediaserver.sharedImages.setNoImagesMsg();
+                }
+
+                // Terminate UI wait state
+                wessexsaxonics.mediaserver.endWait();
+            }
+        };
+
+        // Send request
+        xhr.send();
+    });
+};
 
 
 
@@ -460,7 +684,7 @@ viewNav.onclick = function(){
         // Load view page
         wessexsaxonics.mediaserver.view.loadPage();
     }
-}
+};
 
 // View page
 var viewPage = document.getElementById('view-page');
@@ -469,7 +693,7 @@ var viewPage = document.getElementById('view-page');
 wessexsaxonics.mediaserver.view.loadPage = function(){
 
     // Clear all currently displayed images
-    wessexsaxonics.mediaserver.view.clearPageData()
+    wessexsaxonics.mediaserver.view.clearPageData();
 
     // Display all user images once page has loaded
     wessexsaxonics.mediaserver.api.listImages();
@@ -479,7 +703,7 @@ wessexsaxonics.mediaserver.view.loadPage = function(){
 
     // Display View page
     wessexsaxonics.mediaserver.navigation.displayPage(viewPage);
-}
+};
 
 
 // Images grid
@@ -546,8 +770,8 @@ wessexsaxonics.mediaserver.view.setNoImagesMsg = function(){
     noImages.innerHTML = "No images to display";
 
     // Add no images message to display grid
-    document.getElementById("images").appendChild(noImages);
-}
+    imagesGrid.appendChild(noImages);
+};
 
 // Clear images from image grid
 wessexsaxonics.mediaserver.view.clearPageData = function(){
@@ -558,7 +782,7 @@ wessexsaxonics.mediaserver.view.clearPageData = function(){
         // Remove first item
         imagesGrid.removeChild(imagesGrid.firstChild);
     }
-}
+};
 
 
 
@@ -575,7 +799,7 @@ uploadNav.onclick = function(){
 
         wessexsaxonics.mediaserver.upload.loadPage();
     }
-}
+};
 
 // Upload page
 var uploadPage = document.getElementById('upload-page');
@@ -584,14 +808,14 @@ var uploadPage = document.getElementById('upload-page');
 wessexsaxonics.mediaserver.upload.loadPage = function(){
 
     // Clears form
-    wessexsaxonics.mediaserver.view.clearPageData()
+    wessexsaxonics.mediaserver.view.clearPageData();
 
     // Select Upload nav item
     wessexsaxonics.mediaserver.navigation.selectNavItem(uploadNav);
 
     // Display Upload page
     wessexsaxonics.mediaserver.navigation.displayPage(uploadPage);
-}
+};
 
 
 // Upload image form
@@ -619,7 +843,7 @@ uploadForm.onsubmit = function(){
         var imageFile = reader.result;
 
         // Initialise new image from which to retrieve width and height attributes
-        var img = new Image;
+        var img = new Image();
 
         // Image onload event
         img.onload = function() {
@@ -629,7 +853,7 @@ uploadForm.onsubmit = function(){
 
             // Clear form
             wessexsaxonics.mediaserver.upload.clearPageData();
-        }
+        };
 
         // Load image source, initiating callback event
         img.src = imageFile;
@@ -640,13 +864,13 @@ uploadForm.onsubmit = function(){
 
         reader.readAsDataURL(file);
     }
-}
+};
 
 // Sets name in use flag to displayed
 wessexsaxonics.mediaserver.upload.displayNameInUseFlag = function() {
 
     nameInUse.style.display = DISPLAYED;
-}
+};
 
 // Clear images from image grid
 wessexsaxonics.mediaserver.upload.clearPageData = function() {
@@ -656,7 +880,7 @@ wessexsaxonics.mediaserver.upload.clearPageData = function() {
 
     // Hide alert tag
     nameInUse.style.display = HIDDEN;
-}
+};
 
 
 
@@ -677,20 +901,28 @@ editNav.onclick = function(){
         // Determine whether to load edit page
         wessexsaxonics.mediaserver.edit.loadPage(image_id);
     }
-}
+};
 
 // Edit page
 var editPage = document.getElementById('edit-page');
 
 // Fetches page data, then determines whether to load
-wessexsaxonics.mediaserver.edit.loadPage = function(imageId){
+wessexsaxonics.mediaserver.edit.loadPage = function(imageId, shared=false){
 
     // Clears page of data
     wessexsaxonics.mediaserver.edit.clearPageData();
 
-    // Determines whether to load edit page with a retrieved image or fail and return
-    wessexsaxonics.mediaserver.api.getImage(imageId);
-}
+    if (shared) {
+
+        // Determines whether to load edit page with a retrieved shared image or fail and return
+        wessexsaxonics.mediaserver.api.getSharedImage(imageId);
+
+    } else {
+
+        // Determines whether to load edit page with a retrieved image or fail and return
+        wessexsaxonics.mediaserver.api.getImage(imageId);
+    }
+};
 
 
 // Edit page title
@@ -728,10 +960,13 @@ editForm.onsubmit = function(){
 
     // Clear page
     wessexsaxonics.mediaserver.edit.clearPageData();
-}
+};
 
 // Image element
 var html_image = document.getElementById("edit-image");
+
+// Share image link
+var shareLink = document.getElementById("share-image");
 
 // Delete image link
 var deleteLink = document.getElementById("delete-image");
@@ -767,18 +1002,24 @@ wessexsaxonics.mediaserver.edit.setPageData = function(name, image, width, heigh
         wessexsaxonics.mediaserver.api.deleteImage(name);
     };
 
+    // Share link onclick event
+    shareLink.onclick = function() {
+
+        wessexsaxonics.mediaserver.api.getShareURL(name);
+    };
+
     // Set image properties
     html_image.src = image;
     html_image.alt = name;
     html_image.width = width;
     html_image.height = height;
-}
+};
 
 // Clears page of data
 wessexsaxonics.mediaserver.edit.clearPageData = function() {
 
     // Clear title
-    editTitle.innerHTML = "Editing {0}"
+    editTitle.innerHTML = "Editing {0}";
 
     // Clear imageId element
     imageId.value = "";
@@ -801,7 +1042,7 @@ wessexsaxonics.mediaserver.edit.clearPageData = function() {
     html_image.alt = "";
     html_image.width = 0;
     html_image.height = 0;
-}
+};
 
 
 // Returns a div containing metadata editing fields
@@ -824,7 +1065,7 @@ wessexsaxonics.mediaserver.edit.generateMetadataFields = function(metadata) {
     }
 
     return div;
-}
+};
 
 wessexsaxonics.mediaserver.edit.buildMetadataItem = function(key, value){
 
@@ -847,4 +1088,120 @@ wessexsaxonics.mediaserver.edit.buildMetadataItem = function(key, value){
     metadataItem.appendChild(metadataValue);
 
     return metadataItem;
-}
+};
+
+
+
+/** Shared Images Page */
+
+// Shared Images nav item
+var sharedNav = document.getElementById('shared');
+
+// Shared Images nav item onclick event
+sharedNav.onclick = function(){
+
+    // Determine if user is signed in
+    if (firebase.auth().currentUser) {
+
+        // Load view page
+        wessexsaxonics.mediaserver.sharedImages.loadPage();
+    }
+};
+
+// Shared Images page
+var sharedPage = document.getElementById('shared-page');
+
+// Fetches page data, then loads
+wessexsaxonics.mediaserver.sharedImages.loadPage = function(){
+
+    // Clear all currently displayed images
+    wessexsaxonics.mediaserver.sharedImages.clearPageData();
+
+    // Display all shared images once page has loaded
+    wessexsaxonics.mediaserver.api.listSharedImages();
+
+    // Select Shared Images nav item
+    wessexsaxonics.mediaserver.navigation.selectNavItem(sharedNav);
+
+    // Display Shared Images page
+    wessexsaxonics.mediaserver.navigation.displayPage(sharedPage);
+};
+
+
+// Shared images grid
+var sharedImagesGrid = document.getElementById("shared-images");
+
+// Adds a shared image to the shared image grid
+wessexsaxonics.mediaserver.sharedImages.addImageToGrid = function(name, image, width, height) {
+
+    // Create parent div
+    var imageDiv = document.createElement("div");
+    imageDiv.className = "float-image";
+
+    // Create new image using retrieved data, of fixed width 200
+    var html_image = document.createElement("img");
+    html_image.src = image;
+    html_image.alt = name;
+    html_image.width = 200;
+    html_image.addEventListener("click", function(){
+
+        wessexsaxonics.mediaserver.edit.loadPage(name, true);
+    }, false);
+
+    // Create labels div
+    var labelDiv = document.createElement("div");
+
+    // Create label with image name
+    var nameLabel = document.createElement("p");
+    nameLabel.innerHTML = "ID: <b>" + name + "</b>";
+
+    // Create label with image dimensions
+    var dimensionsLabel = document.createElement("p");
+    dimensionsLabel.innerHTML = "Width: <b>" + width + "</b>, Height: <b>" + height + "</b>";
+
+    // Create anchor with link to edit image
+    var editLink = document.createElement("a");
+    editLink.innerHTML = "Edit";
+    editLink.href = "javascript:void(0)";
+    editLink.addEventListener("click", function(){
+
+        wessexsaxonics.mediaserver.edit.loadPage(name, true);
+    }, false);
+
+    // Append text elements to label div
+    labelDiv.appendChild(nameLabel);
+    labelDiv.appendChild(dimensionsLabel);
+    labelDiv.appendChild(editLink);
+
+    // Append image and label div to parent div
+    imageDiv.appendChild(html_image);
+    imageDiv.appendChild(labelDiv);
+
+    // Append parent div to grid div
+    sharedImagesGrid.appendChild(imageDiv);
+};
+
+// Displays no images
+wessexsaxonics.mediaserver.sharedImages.setNoImagesMsg = function(){
+
+    // Empty shared image grid
+    wessexsaxonics.mediaserver.sharedImages.clearPageData();
+
+    // Create no images message
+    var noImages = document.createElement("p");
+    noImages.innerHTML = "No images to display";
+
+    // Add no images message to display grid
+    sharedImagesGrid.appendChild(noImages);
+};
+
+// Clear images from shared image grid
+wessexsaxonics.mediaserver.sharedImages.clearPageData = function(){
+
+    // While there are items to remove
+    while (sharedImagesGrid.firstChild) {
+
+        // Remove first item
+        sharedImagesGrid.removeChild(sharedImagesGrid.firstChild);
+    }
+};
