@@ -55,7 +55,10 @@
             <li><a id="home" href='javascript:void(0)' class="active"><b>Wessex Saxonics Media Server POC</b></a></li>
             <li><a id="upload" href="javascript:void(0)">Upload</a></li>
             <li><a id="edit" href="javascript:void(0)">Edit</a></li>
-            <li style="float:right"><a id="sign-out" href="javascript:void(0)">Sign Out</a></li>
+            <div style="float:right;">
+                <li><a id="user" href="javascript:void(0)">User</a></li>
+                <li><a id="sign-out" href="javascript:void(0)">Sign Out</a></li>
+            </div>
         </ul>
 
         <div id="firebase">
@@ -95,20 +98,20 @@
                             <h3>Adjust Image</h3>
                             <input id="image-id" hidden />
 
-                            <label for="auto-fix">Auto Fix? </label>
+                            <label for="auto-fix">Auto Fix: </label>
                             <input name="auto-fix" id="auto-fix" type="checkbox"/>
 
-                            <label for="scale-factor">Scale by </label>
+                            <label for="scale-factor">Scale by: </label>
                             <input name="scale-factor" id="scale-factor" type="number" min="0" style="text-align: right; width: 75px;"/>
                             %
 
                             <label for="degrees-to-rotate">Rotate By: </label>
                             <input name="degrees-to-rotate" id="degrees-to-rotate" type="number" step="90" min="0" max="270" style="text-align: right; width: 75px;"/>
 
-                            <label for="flip-vertically">Flip Vertically? </label>
+                            <label for="flip-vertically">Flip Vertically: </label>
                             <input name="flip-vertically" id="flip-vertically" type="checkbox"/>
 
-                            <label for="flip-horizontally">Flip Horizontally? </label>
+                            <label for="flip-horizontally">Flip Horizontally: </label>
                             <input name="flip-horizontally" id="flip-horizontally" type="checkbox"/>
 
                             <input id="edit-submit" type="submit" value="Submit"/>

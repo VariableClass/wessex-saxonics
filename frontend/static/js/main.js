@@ -101,6 +101,9 @@ wessexsaxonics.mediaserver.navigation.displayPage = function(page){
 
 /** Authentication */
 
+// User name nav item
+var userNav = document.getElementById('user');
+
 // Signout nav item
 var signoutNav = document.getElementById('sign-out');
 
@@ -125,15 +128,19 @@ firebase.auth().onAuthStateChanged(function(user) {
         // Hide firebase container
         document.getElementById('firebase').style.display = HIDDEN;
 
-        // Hide nav items
+        // Load user name into nav item
+        userNav.innerHTML = user.displayName;
+
+        // Show nav items
         uploadNav.style.display = DISPLAYED;
         editNav.style.display = DISPLAYED;
+        userNav.style.display = DISPLAYED;
         signoutNav.style.display = DISPLAYED;
 
         // Load view page
         wessexsaxonics.mediaserver.view.loadPage();
 
-        } else {
+    } else {
 
         // Show firebase container
         document.getElementById('firebase').style.display = DISPLAYED;
@@ -144,6 +151,7 @@ firebase.auth().onAuthStateChanged(function(user) {
         // Hide nav items
         uploadNav.style.display = HIDDEN;
         editNav.style.display = HIDDEN;
+        userNav.style.display = HIDDEN;
         signoutNav.style.display = HIDDEN;
 
         // Hide all pages
@@ -259,11 +267,11 @@ wessexsaxonics.mediaserver.api.listImages = function() {
 
                     // Display no images message
                     wessexsaxonics.mediaserver.view.setNoImagesMsg();
-              }
+                }
 
-              // Terminate UI wait state
-              wessexsaxonics.mediaserver.endWait();
-          }
+                // Terminate UI wait state
+                wessexsaxonics.mediaserver.endWait();
+            }
         };
 
         // Send request
@@ -457,7 +465,7 @@ var viewPage = document.getElementById('view-page');
 // Fetches page data, then loads
 wessexsaxonics.mediaserver.view.loadPage = function(){
 
-    // Clear any existing wait
+    // Terminate any wait state
     wessexsaxonics.mediaserver.endWait();
 
     // Clear all currently displayed images
