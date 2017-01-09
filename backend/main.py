@@ -427,7 +427,8 @@ class WessexSaxonicsApi(remote.Service):
                              degreesToRotate=image_metadata.rotatedDegrees,
                              flipv=image_metadata.flip_vertical,
                              fliph=image_metadata.flip_horizontal,
-                             authorised_users=image_metadata.authorised_users)
+                             authorised_users=image_metadata.authorised_users,
+                             owner=image_metadata.owner)
 
             else:
                 return Image(name=image_metadata.name,

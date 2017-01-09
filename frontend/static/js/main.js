@@ -984,7 +984,7 @@ editForm.onsubmit = function(){
     authedUsers = []
 
     var children = authorisedUsers.children;
-    for (var i = 0; i < children.length; i++) {
+    for (var i = 1; i < children.length; i++) {
 
         authedUsers.push(children[i].id);
     }
@@ -1056,6 +1056,9 @@ wessexsaxonics.mediaserver.edit.setPageData = function(name, image, width, heigh
 
             wessexsaxonics.mediaserver.api.getShareURL(name);
         };
+    } else {
+
+        shareLink.style.display = HIDDEN;
     }
 
     // If authorised users has been passed in
@@ -1120,8 +1123,12 @@ wessexsaxonics.mediaserver.edit.generateAuthorisedUsers = function(authorised_us
         // Get JSON key
         user = authorised_users[i];
 
-        // Create a metadata item
-        div.appendChild(wessexsaxonics.mediaserver.edit.buildUserItem(user));
+        // If not just padding
+        if (user.length > 3){
+
+            // Create a metadata item
+            div.appendChild(wessexsaxonics.mediaserver.edit.buildUserItem(user));
+        }
     }
 
     return div
@@ -1130,15 +1137,9 @@ wessexsaxonics.mediaserver.edit.generateAuthorisedUsers = function(authorised_us
 // Returns a div containing authorised users and deletion links
 wessexsaxonics.mediaserver.edit.buildUserItem = function(user) {
 
-    // Create form to hold label and button
-    var userForm = document.createElement('form');
-    userForm.id = user;
-
-    // On button click event
-    userForm.onsubmit = function() {
-
-        userForm.parentNode.removeChild(userForm);
-    }
+    // Create div to hold label and button
+    var userDiv = document.createElement('div');
+    userDiv.id = user;
 
     // Create label to identify user
     var label = document.createElement('label');
@@ -1149,11 +1150,17 @@ wessexsaxonics.mediaserver.edit.buildUserItem = function(user) {
     var deleteUser = document.createElement('button');
     deleteUser.innerHTML = "Remove";
 
-    // Append label and value to div
-    userForm.appendChild(label);
-    userForm.appendChild(deleteUser);
+    // On button click event
+    deleteUser.onclick = function(){
 
-    return userForm;
+        userDiv.parentNode.removeChild(userDiv);
+    }
+
+    // Append label and value to div
+    userDiv.appendChild(label);
+    userDiv.appendChild(deleteUser);
+
+    return userDiv;
 }
 
 // Returns a div containing metadata editing fields
