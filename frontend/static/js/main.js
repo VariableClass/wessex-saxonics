@@ -674,8 +674,12 @@ wessexsaxonics.mediaserver.api.listSharedImages = function() {
                             wessexsaxonics.mediaserver.sharedImages.addImageToGrid(name, image, width, height);
                         }
 
-                    }
+                    } else {
 
+                        // Display no images message
+                        wessexsaxonics.mediaserver.sharedImages.setNoImagesMsg();
+                    }
+                    
                 } else {
 
                     // Display no images message

@@ -281,28 +281,3 @@ paths:
             description: Unauthorized
           default:
             description: Unexpected error
-
-
-  /users/{user_id}:
-    get:
-      summary: User
-      operationId: userGet
-      description: |
-        The User endpoint returns a single user, given an ID. The response includes the user ID alone.
-      parameters:
-        - name: user_id
-          in: path
-          description: ID of user to return
-          required: true
-          type: string
-      security:
-        - api_key: []
-      tags:
-        - User
-      responses:
-        200:
-          description: A single User
-        401:
-          description: Unauthorized
-        default:
-          description: Unexpected error
