@@ -1,5 +1,8 @@
 # Wessex Saxonics Media Server POC
+
 https://wessex-saxonics.appspot.com/
+
+***Built and tested on GOOGLE CHROME, please view in this browser.***
 
 The Wessex Saxonics Media Server proof of concept operates as two independent services, both running on Google Cloud Platform. All requests are sent as AJAX HTTPS requests, authorised by Firebase provided Java Web Tokens. Requests between the frontend and backend services are secured with an API key.
 
