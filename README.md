@@ -27,13 +27,15 @@ There should now sit a single, solitary image on your home page, listed with its
 #### Editing Images
 Clicking the 'Edit' link below an image or indeed, the image itself, will take you to the **Edit** page. It is also possible to select the Edit navigation item and manually enter the name of the image you wish to edit. A non-matching ID will return 404 Not Found.
 
-Here you are presented with a somewhat messy arry of controls. The first set; *Adjust Image* enable you to automatically adjust, scale, rotate and flip the image vertically or horizontally. Clicking the **Submit** button will commit any changes you make to the REST API. The second set is EXIF image metadata retrieved from the image file.
+Here you are presented with a somewhat messy array of controls. The first set; *Adjust Image* enable you to automatically adjust, scale, rotate and flip the image vertically or horizontally. Clicking the **Submit** button will commit any changes you make to the REST API. The second set is EXIF image metadata retrieved from the image file.
 
 There are also two links on this page.
 - **Delete** - Which obviously removes the image file and it's metadata from the cloud storage and datastore respectively, via a DELETE request to the API.
 - **Share** - The functionality of this link is not immediately obvious, however clicking it will reveal that it generates a URL which can be accessed by anyone you share it with who has an account with the Media Server application and is logged in. The link is valid for *30 minutes* but will expire prematurely the minute it is accessed. Following this link will give the bearer the ability to edit the photo from which you generated the link, though they will not be able to deauthorise themselves nor any other invitees you may have shared links with, as you can. 
 
 #### Interacting with Shared Images
-When someone has shared an image with you, it will appear under your Shared Images tab. From here you can select and edit it as you would any of your own images, though you will not be able to remove image editors as you can with your own uploads.
+When someone has shared an image with you, it will appear under your Shared Images tab. From here you can select and edit it as you would any of your own images.
+
+When you have shared an image with others, each user who has followed your share link will appear as an ID string under the **Authorised Users** heading on the **Edit** page. You may note that you will are not able to remove authorised users of others' images, nor provide share links, as you can with your own uploads.
 
 > Currently requests for shared images are a little slower than those for images you upload as Image metadata (as an ndb.Model) is written to the Cloud Datastore against a parent key of your User ndb.Model, so queries may be executed using the user ID as an ancestor key.
