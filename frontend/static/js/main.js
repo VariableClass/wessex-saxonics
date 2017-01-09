@@ -207,27 +207,27 @@ wessexsaxonics.mediaserver.api.getImage = function(image_id) {
             if (xhr.readyState == XMLHttpRequest.DONE){
 
                 // If request status is 404
-                if (xhr.status == 404){
-
-                    // Alert user of request failure
-                    alert("No image found for ID: " + image_id);
-
-                    // Load main page
-                    wessexsaxonics.mediaserver.view.loadPage();
-
-                } else {    // Else if request status not 404
+                if (xhr.status == 200){
 
                     // Parse response JSON
                     resp = JSON.parse(xhr.responseText);
 
                     // Set Edit page data
-                    wessexsaxonics.mediaserver.edit.setPageData(resp.name, resp.image, resp.width, resp.height, resp.metadata, resp.auto, resp.degreesToRotate, resp.flipv, resp.fliph);
+                    wessexsaxonics.mediaserver.edit.setPageData(resp.name, resp.image, resp.width, resp.height, resp.metadata, resp.auto, resp.degreesToRotate, resp.flipv, resp.fliph, resp.owner, resp.authorised_users);
 
                     // Select Edit nav item
                     wessexsaxonics.mediaserver.navigation.selectNavItem(editNav);
 
                     // Display Edit page
                     wessexsaxonics.mediaserver.navigation.displayPage(editPage);
+
+                } else {
+
+                    // Alert user of request failure
+                    alert("No image found for ID: " + image_id);
+
+                    // Load main page
+                    wessexsaxonics.mediaserver.view.loadPage();
                 }
 
                 // Terminate UI wait state
@@ -264,28 +264,32 @@ wessexsaxonics.mediaserver.api.listImages = function() {
             // If request has completed
             if (xhr.readyState == XMLHttpRequest.DONE){
 
-                // Parse response JSON
-                resp = JSON.parse(xhr.responseText);
-                resp.items = resp.items || [];
+                // If request status is 404
+                if (xhr.status == 200){
 
-                // If items returned
-                if (resp.items.length > 0) {
+                    // Parse response JSON
+                    resp = JSON.parse(xhr.responseText);
+                    resp.items = resp.items || [];
 
-                    // Iterate through each one and display it
-                    for (var i = 0; i < resp.items.length; i++) {
+                    // If items returned
+                    if (resp.items.length > 0) {
 
-                        var name = resp.items[i].name;
-                        var image = resp.items[i].image;
-                        var width = resp.items[i].width;
-                        var height = resp.items[i].height;
+                        // Iterate through each one and display it
+                        for (var i = 0; i < resp.items.length; i++) {
 
-                        wessexsaxonics.mediaserver.view.addImageToGrid(name, image, width, height);
+                            var name = resp.items[i].name;
+                            var image = resp.items[i].image;
+                            var width = resp.items[i].width;
+                            var height = resp.items[i].height;
+
+                            wessexsaxonics.mediaserver.view.addImageToGrid(name, image, width, height);
+                        }
+
+                    } else {    // Else if no items returned
+
+                        // Display no images message
+                        wessexsaxonics.mediaserver.view.setNoImagesMsg();
                     }
-
-                } else {    // Else if no items returned
-
-                    // Display no images message
-                    wessexsaxonics.mediaserver.view.setNoImagesMsg();
                 }
 
                 // Terminate UI wait state
@@ -335,8 +339,11 @@ wessexsaxonics.mediaserver.api.uploadImage = function(id, image, width, height) 
                 // If request status is 400
                 if (xhr.status == 400){
 
+                    // Retrieve error message
+                    error = JSON.stringify(xhr.responseText);
+
                     // Display name in use flag
-                    wessexsaxonics.mediaserver.upload.displayNameInUseFlag();
+                    wessexsaxonics.mediaserver.upload.displayErrorFlag(error);
 
                     // Load upload page
                     wessexsaxonics.mediaserver.upload.loadPage();
@@ -355,7 +362,7 @@ wessexsaxonics.mediaserver.api.uploadImage = function(id, image, width, height) 
 };
 
 // Edits image metadata
-wessexsaxonics.mediaserver.api.editImage = function(image_id, scaleFactor, auto, degreesToRotate, flipv, fliph){
+wessexsaxonics.mediaserver.api.editImage = function(image_id, scaleFactor, auto, degreesToRotate, flipv, fliph, authorised_users=null, owner){
 
     // Put UI into wait state
     wessexsaxonics.mediaserver.startWait();
@@ -370,6 +377,13 @@ wessexsaxonics.mediaserver.api.editImage = function(image_id, scaleFactor, auto,
         jsonPayload.degreesToRotate = Number(degreesToRotate);
         jsonPayload.flipv = flipv;
         jsonPayload.fliph = fliph;
+        jsonPayload.owner = owner;
+
+        // Append authorised users if applicable
+        if (authorised_users !== null){
+
+            jsonPayload.authorised_users = authorised_users;
+        }
 
         // Create new request
         var xhr = new XMLHttpRequest();
@@ -390,24 +404,24 @@ wessexsaxonics.mediaserver.api.editImage = function(image_id, scaleFactor, auto,
             if (xhr.readyState == XMLHttpRequest.DONE){
 
                 // If request status not 200
-                if (xhr.status != 200){
-
-                    // Load upload page
-                    wessexsaxonics.mediaserver.view.loadPage();
-
-                } else {    // Else if request status is 200
+                if (xhr.status == 200){
 
                     // Parse response JSON
                     resp = JSON.parse(xhr.responseText);
 
                     // Set Edit page data
-                    wessexsaxonics.mediaserver.edit.setPageData(resp.name, resp.image, resp.width, resp.height, resp.metadata, resp.auto, resp.degreesToRotate, resp.flipv, resp.fliph);
+                    wessexsaxonics.mediaserver.edit.setPageData(resp.name, resp.image, resp.width, resp.height, resp.metadata, resp.auto, resp.degreesToRotate, resp.flipv, resp.fliph, resp.owner, resp.authorised_users);
 
                     // Select Edit nav item
                     wessexsaxonics.mediaserver.navigation.selectNavItem(editNav);
 
                     // Display Edit page
                     wessexsaxonics.mediaserver.navigation.displayPage(editPage);
+
+                } else {
+
+                    // Load upload page
+                    wessexsaxonics.mediaserver.view.loadPage();
                 }
 
                 // Terminate UI wait state
@@ -481,19 +495,25 @@ wessexsaxonics.mediaserver.api.getShareURL = function(image_id) {
             // If request has completed
             if (xhr.readyState == XMLHttpRequest.DONE){
 
-                // If request status is 404
-                if (xhr.status == 404){
-
-                    // Alert user of request failure
-                    alert("No image found for ID: " + image_id);
-
-                } else {    // Else if request status not 404
+                // If request status is 200
+                if (xhr.status == 200){
 
                     // Parse response JSON
                     resp = JSON.parse(xhr.responseText);
 
                     // Display share URL to user
                     prompt("Share the link below with a friend and they'll be able to edit this image. This link will expire at " + resp.expiry, resp.url);
+
+                    // Determine whether to load edit page
+                    wessexsaxonics.mediaserver.edit.loadPage(image_id);
+
+                } else {
+
+                    // Alert user of request failure
+                    alert("No image found for ID: " + image_id);
+
+                    // Load view page
+                    wessexsaxonics.mediaserver.view.loadPage();
                 }
 
                 // Terminate UI wait state
@@ -634,25 +654,29 @@ wessexsaxonics.mediaserver.api.listSharedImages = function() {
             // If request has completed
             if (xhr.readyState == XMLHttpRequest.DONE){
 
-                // Parse response JSON
-                resp = JSON.parse(xhr.responseText);
-                resp.items = resp.items || [];
+                if (xhr.status == 200) {
 
-                // If items returned
-                if (resp.items.length > 0) {
+                    // Parse response JSON
+                    resp = JSON.parse(xhr.responseText);
+                    resp.items = resp.items || [];
 
-                    // Iterate through each one and display it
-                    for (var i = 0; i < resp.items.length; i++) {
+                    // If items returned
+                    if (resp.items.length > 0) {
 
-                        var name = resp.items[i].name;
-                        var image = resp.items[i].image;
-                        var width = resp.items[i].width;
-                        var height = resp.items[i].height;
+                        // Iterate through each one and display it
+                        for (var i = 0; i < resp.items.length; i++) {
 
-                        wessexsaxonics.mediaserver.sharedImages.addImageToGrid(name, image, width, height);
+                            var name = resp.items[i].name;
+                            var image = resp.items[i].image;
+                            var width = resp.items[i].width;
+                            var height = resp.items[i].height;
+
+                            wessexsaxonics.mediaserver.sharedImages.addImageToGrid(name, image, width, height);
+                        }
+
                     }
 
-                } else {    // Else if no items returned
+                } else {
 
                     // Display no images message
                     wessexsaxonics.mediaserver.sharedImages.setNoImagesMsg();
@@ -821,8 +845,8 @@ wessexsaxonics.mediaserver.upload.loadPage = function(){
 // Upload image form
 var uploadForm = document.getElementById('upload-form');
 
-// Alert tag describing image name already taken
-var nameInUse = document.getElementById('name-in-use');
+// Upload error tag
+var errorFlag = document.getElementById('error-flag');
 
 // Upload image form onsubmit event
 uploadForm.onsubmit = function(){
@@ -866,10 +890,11 @@ uploadForm.onsubmit = function(){
     }
 };
 
-// Sets name in use flag to displayed
-wessexsaxonics.mediaserver.upload.displayNameInUseFlag = function() {
+// Sets error flag to displayed
+wessexsaxonics.mediaserver.upload.displayErrorFlag = function(error) {
 
-    nameInUse.style.display = DISPLAYED;
+    errorFlag.innerHTML = error;
+    errorFlag.style.display = DISPLAYED;
 };
 
 // Clear images from image grid
@@ -879,7 +904,7 @@ wessexsaxonics.mediaserver.upload.clearPageData = function() {
     uploadForm.reset();
 
     // Hide alert tag
-    nameInUse.style.display = HIDDEN;
+    errorFlag.style.display = HIDDEN;
 };
 
 
@@ -955,12 +980,24 @@ var flipHorizontally = document.getElementById('flip-horizontally');
 // Edit form onsubmit event
 editForm.onsubmit = function(){
 
+    // Retrieve all remaining authorised users
+    authedUsers = []
+
+    var children = authorisedUsers.children;
+    for (var i = 0; i < children.length; i++) {
+
+        authedUsers.push(children[i].id);
+    }
+
     // Submit API call passing image ID and scale factor
-    wessexsaxonics.mediaserver.api.editImage(imageId.value, scaleFactor.value, autoFix.checked, degreesToRotate.value, flipVertically.checked, flipHorizontally.checked);
+    wessexsaxonics.mediaserver.api.editImage(imageId.value, scaleFactor.value, autoFix.checked, degreesToRotate.value, flipVertically.checked, flipHorizontally.checked, authedUsers, globalOwner);
 
     // Clear page
     wessexsaxonics.mediaserver.edit.clearPageData();
 };
+
+// Variable to hold owner if current user
+var globalOwner = "";
 
 // Image element
 var html_image = document.getElementById("edit-image");
@@ -971,8 +1008,14 @@ var shareLink = document.getElementById("share-image");
 // Delete image link
 var deleteLink = document.getElementById("delete-image");
 
+// Authorised users list
+var authorisedUsers = document.getElementById("authorised-users");
+
 // Populates page with data
-wessexsaxonics.mediaserver.edit.setPageData = function(name, image, width, height, metadata, auto, rotatedDegrees, flipv, fliph){
+wessexsaxonics.mediaserver.edit.setPageData = function(name, image, width, height, metadata, auto, rotatedDegrees, flipv, fliph, owner, authorised_users=null){
+
+    // Update global owner variable
+    globalOwner = owner;
 
     // Set title
     editTitle.innerHTML = "Editing " + name;
@@ -1002,11 +1045,25 @@ wessexsaxonics.mediaserver.edit.setPageData = function(name, image, width, heigh
         wessexsaxonics.mediaserver.api.deleteImage(name);
     };
 
-    // Share link onclick event
-    shareLink.onclick = function() {
+    // If owner, display share link
+    if (owner == firebase.auth().currentUser.uid){
 
-        wessexsaxonics.mediaserver.api.getShareURL(name);
-    };
+        // Display share link
+        shareLink.style.display = DISPLAYED;
+
+        // Share link onclick event
+        shareLink.onclick = function() {
+
+            wessexsaxonics.mediaserver.api.getShareURL(name);
+        };
+    }
+
+    // If authorised users has been passed in
+    if (authorised_users !== null) {
+
+        // Generate authorised users list
+        authorisedUsers.appendChild(wessexsaxonics.mediaserver.edit.generateAuthorisedUsers(authorised_users));
+    }
 
     // Set image properties
     html_image.src = image;
@@ -1031,6 +1088,13 @@ wessexsaxonics.mediaserver.edit.clearPageData = function() {
         metadataDiv.removeChild(metadataDiv.lastChild);
     }
 
+    // If users have been loaded
+    if (authorisedUsers.childNodes.length > 1){
+
+        // Remove metadata items div
+        authorisedUsers.removeChild(authorisedUsers.lastChild);
+    }
+
     // Clear form
     editForm.reset();
 
@@ -1044,6 +1108,53 @@ wessexsaxonics.mediaserver.edit.clearPageData = function() {
     html_image.height = 0;
 };
 
+
+wessexsaxonics.mediaserver.edit.generateAuthorisedUsers = function(authorised_users) {
+
+    // Create a div to append edit fields to
+    var div = document.createElement('div');
+
+    // For each metadata item
+    for (var i = 0, len = authorised_users.length; i < len; ++i) {
+
+        // Get JSON key
+        user = authorised_users[i];
+
+        // Create a metadata item
+        div.appendChild(wessexsaxonics.mediaserver.edit.buildUserItem(user));
+    }
+
+    return div
+};
+
+// Returns a div containing authorised users and deletion links
+wessexsaxonics.mediaserver.edit.buildUserItem = function(user) {
+
+    // Create form to hold label and button
+    var userForm = document.createElement('form');
+    userForm.id = user;
+
+    // On button click event
+    userForm.onsubmit = function() {
+
+        userForm.parentNode.removeChild(userForm);
+    }
+
+    // Create label to identify user
+    var label = document.createElement('label');
+    label.innerHTML = user;
+    label.className = "label";
+
+    // Create delete user button
+    var deleteUser = document.createElement('button');
+    deleteUser.innerHTML = "Remove";
+
+    // Append label and value to div
+    userForm.appendChild(label);
+    userForm.appendChild(deleteUser);
+
+    return userForm;
+}
 
 // Returns a div containing metadata editing fields
 wessexsaxonics.mediaserver.edit.generateMetadataFields = function(metadata) {

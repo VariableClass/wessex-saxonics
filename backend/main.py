@@ -26,6 +26,7 @@ class Image(messages.Message):
     flipv = messages.BooleanField(8)
     fliph = messages.BooleanField(9)
     authorised_users = messages.StringField(10, repeated=True)
+    owner = messages.StringField(11)
 
 
 class ImageCollection(messages.Message):
@@ -41,7 +42,7 @@ class EditMessage(messages.Message):
     flipv = messages.BooleanField(6)
     fliph = messages.BooleanField(7)
     authorised_users = messages.StringField(8, repeated=True)
-
+    owner = messages.StringField(9)
 
 class ShareURL(messages.Message):
     url = messages.StringField(1, required=True)
@@ -198,7 +199,8 @@ class WessexSaxonicsApi(remote.Service):
                          degreesToRotate=image_metadata.rotatedDegrees,
                          flipv=image_metadata.flip_vertical,
                          fliph=image_metadata.flip_horizontal,
-                         authorised_users=json.dumps(image_metadata.authorised_users))
+                         authorised_users=image_metadata.authorised_users,
+                         owner=image_metadata.owner)
 
         # If user is not logged in
         else:
@@ -237,6 +239,7 @@ class WessexSaxonicsApi(remote.Service):
                 raise endpoints.BadRequestException(
                     'Please enter a name for the file')
 
+            # If image of that name does not already exist
             if models.Image.get_image_by_user(request.name, user_id) is None:
 
                 # Knock mime type off start of image base64 and store it
@@ -256,7 +259,8 @@ class WessexSaxonicsApi(remote.Service):
                                         rotatedDegrees=0,
                                         flip_vertical=False,
                                         flip_horizontal=False,
-                                        authorised_users=[])
+                                        authorised_users=[],
+                                        owner=user_id)
 
                     image.put()
 
@@ -309,36 +313,36 @@ class WessexSaxonicsApi(remote.Service):
             # Create new user if user does not already exist
             models.User.if_new_create(user_id)
 
-            # Set as non-admin user for now
-            admin = False
-
             try:
 
                 # Retrieve image metadata
                 image_metadata = models.Image.get_image_by_user(request.image_id, user_id)
 
-                # Can execute admin tasks
-                admin = True
+                # If image matches own image
+                if image_metadata:
 
-                # If metadata not retrieved against user, attempt to retrieve images where they are an authorised user
-                if image_metadata is None:
+                    # If they own the image currently being edited
+                    if request.owner == image_metadata.owner:
 
-                    # Retrieve image metadata
-                    image_metadata = models.Image.get_shared_image_by_user(request.image_id, user_id)
+                        # Retrieve image
+                        image_file = crud.retrieve_image_file(image_metadata.key.parent().id() + "/" + request.image_id)
 
-                    # Cannot execute admin tasks
-                    admin = False
+                    else:
+
+                        # Attempt to retrieve image metadata as authorised user
+                        image_metadata = models.Image.get_shared_image_by_user(request.image_id, user_id, request.owner)
 
 
-                # If still no metadata retrieved, they must have removed as an authorised user
-                if image_metadata is None:
+                # If metadata retrieved
+                if image_metadata:
 
+                    # Retrieve file
+                    image_file = crud.retrieve_image_file(image_metadata.key.parent().id() + "/" + request.image_id)
+
+                else:
                     raise endpoints.ForbiddenException(
                         'You do not have the rights to change this image')
 
-
-                # Otherwise, Retrieve image
-                image_file = crud.retrieve_image_file(image_metadata.key.parent().id() + "/" + request.image_id)
 
             except (IndexError):
                 raise endpoints.NotFoundException(
@@ -393,10 +397,10 @@ class WessexSaxonicsApi(remote.Service):
             if request.authorised_users != None:
 
                 # If user is admin
-                if admin:
+                if request.owner == user_id:
 
                     # Update authorised users
-                    image_metadata.authorised_users = json.loads(request.authorised_users)
+                    image_metadata.authorised_users = request.authorised_users
 
 
             image_metadata.put()
@@ -412,8 +416,8 @@ class WessexSaxonicsApi(remote.Service):
             base64_prefix = "data:" + image_metadata.mime_type + ";base64,"
             encoded_image = base64_prefix + base64.b64encode(image_file)
 
-            # If admin, return with authorised users
-            if admin:
+            # If image owner, return with authorised users
+            if request.owner == image_metadata.owner:
                 return Image(name=image_metadata.name,
                              image=encoded_image,
                              height=image_metadata.height,

@@ -70,7 +70,7 @@ body {
     cursor: pointer;
 }
 
-#name-in-use {
+#error-flag {
     display: none;
     color: #ff0000;
 }
@@ -102,6 +102,14 @@ body {
 #edit-submit {
     font-size: 16px;
     font-weight: bold;
+}
+
+#share-image {
+    float: right;
+    position: absolute;
+    top: 100px;
+    right: 10px;
+    font-size: 16px;
 }
 
 #delete-image {

@@ -33,6 +33,7 @@ class Image(ndb.Model):
     flip_vertical = ndb.BooleanProperty()
     flip_horizontal = ndb.BooleanProperty()
     share_expiry = ndb.DateTimeProperty()
+    owner = ndb.StringProperty()
 
     @classmethod
     def get_all_by_user(cls, user_id):
@@ -53,5 +54,10 @@ class Image(ndb.Model):
         return cls.query(cls.authorised_users == user_id)
 
     @classmethod
-    def get_shared_image_by_user(cls, name, user_id):
-        return cls.get_all_shared_with_user(user_id).filter(cls.name == name).get()
+    def get_shared_image_by_user(cls, name, user_id, owner=None):
+
+        if owner is None:
+            return cls.get_all_shared_with_user(user_id).filter(cls.name == name).get()
+
+        else:
+            return cls.get_all_shared_with_user(user_id).filter(cls.name == name).filter(cls.owner == owner).get()

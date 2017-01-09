@@ -84,7 +84,7 @@
                     <p>
                         <label for="image_name">Image Name</label>
                         <input name="image_name" id="image_name" type="text" size="20" required/>
-                        <p id="name-in-use">Name already in use</p>
+                        <p id="error-flag">Name already in use</p>
                         <label for="image_file">File:</label>
                         <input name="image_file" id="image_file" type="file" accept="image/*" size="4" required/>
                     </p>
@@ -122,6 +122,11 @@
                             <div id="metadata">
                                 <h3 style="margin-bottom: 20px;">Metadata</h3>
                             </div>
+
+                            <div id="authorised-users">
+                                <h3>Authorised Users</h3>
+                            </div>
+
                         </form>
                         <a id="delete-image" href="javascript:void(0)">Delete</a>
                     </div>
