@@ -105,6 +105,7 @@ wessexsaxonics.mediaserver.navigation.displayPage = function(page){
 
 /** Authentication */
 
+// EDIT 01/10/2019: A lesson in how not to do it! Left here as a reminder that we all improve...
 // Backend API key
 var API_KEY = "AIzaSyCFecc5GJRVIABKtLMmCY8K-fCiamBCF2k";
 
